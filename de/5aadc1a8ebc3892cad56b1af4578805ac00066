@@ -1,0 +1,83 @@
+.gitignore
+  s_63df47d28eee2d::t_0e5a6d3346252d 1-6
+README.md
+  s_38a8414eb113f8::t_0b03c6764ca834 1-29
+docs/architecture.md
+  s_38a8414eb113f8::t_5ac1c05991ffbb 1-239
+docs/implementation-plan.md
+  s_38a8414eb113f8::t_7a1c3591af1fe6 1-148
+docs/rich-product-markdown.md
+  s_38a8414eb113f8::t_ae681c42829bcd 1-63
+docs/specs/00-geo-remediation-master-plan.md
+  s_38a8414eb113f8::t_81f0f61bf2e94d 1-101
+docs/specs/08-large-catalog-completeness.md
+  s_731b36b668051d::t_64c87bf3edd324 1-547
+docs/specs/09-ecommerce-geo-foundations.md
+  s_38a8414eb113f8::t_eebb91312ca136 1-823
+docs/testing-and-operations.md
+  s_38a8414eb113f8::t_7ad8352a3a21e7 1-34
+docs/user-guide.md
+  s_38a8414eb113f8::t_85c37985ab4166 1-80
+llmscatalog/config/routes.yml
+  s_65ea7aed4e0929::t_7a4923d018e5ce 1-28
+llmscatalog/src/Service/CacheManager.php
+  s_6477c68a999242::t_78accceee4e88b 1-98
+scripts/install-local-test-tools.sh
+  s_212e0e42036528::t_4e94c1332d9eec 1-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "de5aadc1a8ebc3892cad56b1af4578805ac00066",
+  "prompts": {},
+  "sessions": {
+    "s_212e0e42036528": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ed33-06ba-7fd2-937f-8e19db4dcd26",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    },
+    "s_38a8414eb113f8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a10886-1d1a-7873-8633-07046a2e4d68",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    },
+    "s_63df47d28eee2d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a10bec-ccba-7c53-b437-c71617a29317",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    },
+    "s_6477c68a999242": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ed2f-f66c-7003-a532-d008e5b21147",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    },
+    "s_65ea7aed4e0929": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ed1f-831e-71f0-b6a4-e0a8ab7bdc1d",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    },
+    "s_731b36b668051d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0daae-c2e7-7ac3-8c11-4ec60d052c8c",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    }
+  }
+}
