@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    public: true
+    autowire: true
+    autoconfigure: true
+
+  LlmsCatalog\Controller\Admin\ConfigurationController: ~
+  LlmsCatalog\Audit\AuditRunner: ~
+  LlmsCatalog\Audit\PageInventory: ~
+  LlmsCatalog\Audit\SurfaceAuditor: ~
+  LlmsCatalog\Audit\FeedComparisonService: ~
+  LlmsCatalog\Audit\AuditApplicationService: ~
+  LlmsCatalog\Audit\AuditResponseFactory: ~

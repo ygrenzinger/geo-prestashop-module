@@ -1,0 +1,28 @@
+llmscatalog_configuration:
+  path: /llmscatalog/configuration
+  methods: [GET]
+  defaults:
+    _controller: 'LlmsCatalog\Controller\Admin\ConfigurationController::indexAction'
+    _legacy_controller: AdminLlmsCatalog
+    _legacy_link: AdminLlmsCatalog
+llmscatalog_configuration_save:
+  path: /llmscatalog/configuration
+  methods: [POST]
+  defaults:
+    _controller: 'LlmsCatalog\Controller\Admin\ConfigurationController::saveAction'
+    _legacy_controller: AdminLlmsCatalog
+    _legacy_link: AdminLlmsCatalog
+llmscatalog_audit_run:
+  path: /llmscatalog/audit
+  methods: [POST]
+  defaults:
+    _controller: 'LlmsCatalog\Controller\Admin\AuditController::runAction'
+    _legacy_controller: AdminLlmsCatalog
+    _legacy_link: AdminLlmsCatalog
+llmscatalog_audit_report:
+  path: /llmscatalog/audit/report
+  methods: [GET]
+  defaults:
+    _controller: 'LlmsCatalog\Controller\Admin\AuditController::reportAction'
+    _legacy_controller: AdminLlmsCatalog
+    _legacy_link: AdminLlmsCatalog

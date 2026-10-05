@@ -1,0 +1,88 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+  {% trans_default_domain 'Modules.Llmscatalog.Admin' %}
+  <div class="alert alert-info">
+    {{ 'This module publishes deterministic public catalog information. It does not guarantee AI-search inclusion or ranking.'|trans }}
+  </div>
+  <div class="alert alert-info">{{ 'These settings apply to all shops.'|trans }}</div>
+  {% if missing_full_locale %}
+    <div class="alert alert-warning">{{ 'At least one active language has no full locale. Its ISO fallback URL is shown for compatibility; configure a full locale to use canonical locale URLs.'|trans }}</div>
+  {% endif %}
+  <div class="alert alert-info">{{ 'Configured root product limit: %configured%; effective runtime limit: %effective% (maximum 250). The configured document limit is %bytes% bytes; limits below 16 KiB may truncate featured content.'|trans({'%configured%': configured_product_limit, '%effective%': effective_product_limit, '%bytes%': configured_byte_limit}) }}</div>
+  {% if configured_product_limit > 250 %}<div class="alert alert-warning">{{ 'Products beyond the first 250 featured entries require complete indexes to remain discoverable.'|trans }}</div>{% endif %}
+  {% if not form.complete_indexes.vars.data %}<div class="alert alert-warning">{{ 'Complete indexes are disabled; products beyond root limits are not reachable through llmscatalog.'|trans }}</div>{% endif %}
+
+  {{ form_start(form) }}
+    <fieldset{% if not can_update_settings %} disabled{% endif %}>
+      {{ form_widget(form) }}
+      {% if can_update_settings %}
+        <button class="btn btn-primary" type="submit">{{ 'Save'|trans }}</button>
+      {% endif %}
+    </fieldset>
+  {{ form_end(form) }}
+
+  <div class="card mt-3">
+    <div class="card-header">{{ 'Discovery URLs'|trans }}</div>
+    <div class="card-body">
+      <p>{{ 'Shop-root language directory'|trans }}: <code>{{ root_index_url }}</code></p>
+      <ul>
+        {% for item in localized_index_urls %}
+          <li>{{ item.locale }}: <code>{{ item.url }}</code></li>
+        {% endfor %}
+      </ul>
+      <p class="mb-0">{{ 'You may add these stable URLs to the existing XML sitemap. The module does not create or edit sitemap or robots files.'|trans }}</p>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-header">{{ 'Foundation audit (current shop and language)'|trans }}</div>
+    <div class="card-body">
+          <p>{{ 'This read-only audit checks the homepage, up to 10 categories, and up to 25 products in bounded batches. The report is retained in this back-office session for 15 minutes.'|trans }}</p>
+      <button class="btn btn-primary" type="button" id="llmscatalog-audit-run">{{ 'Run audit'|trans }}</button>
+      <button class="btn btn-secondary" type="button" id="llmscatalog-audit-cancel">{{ 'Cancel'|trans }}</button>
+      <a class="btn btn-outline-secondary d-none" id="llmscatalog-audit-download" href="{{ path('llmscatalog_audit_report') }}">{{ 'Download JSON report'|trans }}</a>
+      <div class="mt-3"><label for="llmscatalog-feed">{{ 'Compare a one-time feed snapshot (XML or TSV, max 2 MiB)'|trans }}</label>
+        <input type="file" id="llmscatalog-feed" accept=".xml,.rss,.tsv,text/xml,text/tab-separated-values">
+        <button class="btn btn-secondary" type="button" id="llmscatalog-feed-run">{{ 'Compare feed snapshot'|trans }}</button></div>
+      <pre class="mt-3" id="llmscatalog-audit-result" aria-live="polite"></pre>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const run = document.getElementById('llmscatalog-audit-run');
+      const cancel = document.getElementById('llmscatalog-audit-cancel');
+      const result = document.getElementById('llmscatalog-audit-result');
+      const download = document.getElementById('llmscatalog-audit-download');
+      const feedRun = document.getElementById('llmscatalog-feed-run');
+      const feedFile = document.getElementById('llmscatalog-feed');
+      const token = '{{ csrf_token("llmscatalog-audit") }}';
+      let controller = null;
+      async function send(action) {
+        if (controller) controller.abort();
+        controller = new AbortController();
+        const response = await fetch('{{ path("llmscatalog_audit_run") }}', {
+          method: 'POST', credentials: 'same-origin', signal: controller.signal,
+          headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+          body: JSON.stringify({_token:token, action})
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Audit request failed');
+        result.textContent = JSON.stringify(data, null, 2);
+        download.classList.toggle('d-none', !data.complete);
+        return data;
+      }
+      run.addEventListener('click', async () => {
+        try { let data = await send('start'); while (!data.complete) data = await send('continue'); }
+        catch (e) { if (e.name !== 'AbortError') result.textContent = e.message; }
+      });
+      feedRun.addEventListener('click', async () => {
+        if (!feedFile.files.length) { result.textContent = 'Select a feed file first.'; return; }
+        const body = new FormData(); body.append('_token', token); body.append('action', 'feed'); body.append('feed', feedFile.files[0]);
+        try { const response = await fetch('{{ path("llmscatalog_audit_run") }}', {method:'POST',credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest'},body}); const data=await response.json(); if(!response.ok)throw new Error(data.error||'Feed comparison failed'); result.textContent=JSON.stringify(data,null,2); download.classList.remove('d-none'); }
+        catch (e) { result.textContent = e.message; }
+      });
+      cancel.addEventListener('click', () => { if (controller) controller.abort(); send('cancel').catch(e => { result.textContent = e.message; }); });
+    })();
+  </script>
+{% endblock %}
