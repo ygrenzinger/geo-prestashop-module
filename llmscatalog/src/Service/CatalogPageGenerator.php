@@ -56,7 +56,7 @@ final class CatalogPageGenerator
     {
         $type = $categories ? 'categories' : 'products';
         $title = $categories ? 'Catalog category directory' : 'Complete product catalog';
-        $root = (new UrlBuilder(Context::getContext()))->indexUrl($langId);
+        $root = $this->urls->indexUrl($langId);
         $base = rtrim($this->urls->baseLink(), '/') . '/' . rawurlencode($this->urls->canonicalLocale($langId)) . '/llms/catalog/' . $type . '/after/';
         $version=$this->version;
         $lines = ['# ' . ($categoryId ? 'Products in category' : $title), '', '[Back to llms.txt](' . $root . ')', '', 'Catalog version: ' . $version . '.', 'Eligible records: ' . $total . '.', ''];

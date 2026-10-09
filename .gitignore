@@ -1,6 +1,7 @@
 .DS_Store
 /vendor/
 /.phpunit.cache/
+/.tools/
 .env
 .env.*
 !.env.example

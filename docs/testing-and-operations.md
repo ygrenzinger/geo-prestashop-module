@@ -2,12 +2,22 @@
 
 ## Repeatable validation
 
-Run these checks in a PHP-enabled environment with the required extensions and PHPUnit available:
+Unit tests run standalone (no PrestaShop required):
 
 ```bash
-find llmscatalog tests -name '*.php' -print0 | xargs -0 -n1 php -l
-vendor/bin/phpunit -c phpunit.xml.dist
+composer install        # dev tooling only; the shipped module stays dependency-free
+composer lint           # php -l over llmscatalog/ and tests/
+composer test:unit      # vendor/bin/phpunit --testsuite unit
 ```
+
+The integration tests (`tests/Integration`, plus the shop-dependent `CatalogPageGeneratorTest`) need a bootstrapped PrestaShop shop and database. `scripts/run-integration-tests.sh` starts a PrestaShop 9 test shop with Docker and runs the whole suite inside it:
+
+```bash
+scripts/run-integration-tests.sh                 # full suite in the Docker test shop
+scripts/run-integration-tests.sh --testsuite unit
+```
+
+To run against an existing shop instead, point `PS_TEST_SHOP_ROOT` at the shop root (the directory containing `config/config.inc.php`) and run `vendor/bin/phpunit -c phpunit.xml.dist`; `tests/bootstrap.php` loads it. Without a shop, the integration tests self-skip.
 
 The current workspace has not run PHP lint or PHPUnit. Runtime acceptance requires a clean PrestaShop 9.0.2 and supported 9.1.x shop matrix, including install/upgrade, multistore and locale isolation, public visitor-state parity, route/hook behavior, cache invalidation and validators, audit security/cancellation, JSON-LD conflict behavior, and representative large-catalog query/memory checks. Record actual command and shop results before calling acceptance complete.
 

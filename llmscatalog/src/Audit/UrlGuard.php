@@ -10,7 +10,7 @@ final class UrlGuard
     {
         if (strlen($url) > 2048) return false;
         $parts = parse_url($url);
-        if (!$parts || !in_array(strtolower($parts['scheme'] ?? ''), ['http','https'], true) || empty($parts['host']) || isset($parts['user']) || isset($parts['pass'])) return false;
+        if (!$parts || strtolower($parts['scheme'] ?? '') !== 'https' || empty($parts['host']) || isset($parts['user']) || isset($parts['pass'])) return false;
         $host = strtolower(rtrim($parts['host'], '.'));
         if (filter_var($host, FILTER_VALIDATE_IP)) return false;
         foreach (array_merge($allowedHosts, []) as $allowed) {

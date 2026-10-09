@@ -87,4 +87,5 @@ printf 'Composer executable: %s\n' "$(command -v composer)"
 printf '\nPHP syntax and PHPUnit commands for this repository:\n'
 printf "find llmscatalog tests -name '*.php' -print0 | xargs -0 -n1 php -l\n"
 printf 'vendor/bin/phpunit -c phpunit.xml.dist\n'
-printf 'Note: this repository does not currently define PHPUnit as a Composer dependency.\n'
+printf 'Next: run "composer install" to fetch PHPUnit, then "composer test:unit".\n'
+printf 'For the shop-dependent integration tests, use scripts/run-integration-tests.sh (Docker).\n'

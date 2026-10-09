@@ -28,7 +28,7 @@ final class MarkdownRendererTest extends TestCase
     {
         $renderer = new MarkdownRenderer();
 
-        $result = $renderer->truncate("# Shop\n\n## Products\n\n- [One](https://example.test/one)", 80);
+        $result = $renderer->truncate("# Shop\n\n## Products\n\n- [One](https://example.test/one)", 40);
 
         self::assertStringContainsString('This index is truncated', $result);
     }

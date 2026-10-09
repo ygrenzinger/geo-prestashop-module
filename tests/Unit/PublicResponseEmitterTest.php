@@ -9,7 +9,6 @@ final class PublicResponseEmitterTest extends TestCase
     {
         $emitter = new PublicResponseEmitter();
         $matches = new ReflectionMethod($emitter, 'ifNoneMatch');
-        $matches->setAccessible(true);
         self::assertTrue($matches->invoke($emitter, '"other", "sha256"', '"sha256"'));
         self::assertTrue($matches->invoke($emitter, '*', '"sha256"'));
         self::assertTrue($matches->invoke($emitter, 'W/"sha256"', '"sha256"'));
@@ -20,7 +19,6 @@ final class PublicResponseEmitterTest extends TestCase
     {
         $emitter = new PublicResponseEmitter();
         $method = new ReflectionMethod($emitter, 'ifModifiedSince');
-        $method->setAccessible(true);
         self::assertTrue($method->invoke($emitter, gmdate('D, d M Y H:i:s', 1000) . ' GMT', 1000));
         self::assertFalse($method->invoke($emitter, 'invalid', 1000));
     }

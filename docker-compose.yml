@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: prestashop
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-padmin"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "3307:3306"
+
+  prestashop:
+    # Any PrestaShop 9.x tag works; this one matches the host PHP 8.5.
+    # See https://hub.docker.com/r/prestashop/prestashop/tags
+    image: prestashop/prestashop:9.2.0-8.5
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_SERVER: db
+      DB_NAME: prestashop
+      DB_USER: root
+      DB_PASSWD: admin
+      DB_PREFIX: ps_
+      PS_DOMAIN: localhost:8080
+      PS_INSTALL_AUTO: "1"
+      PS_DEV_MODE: "1"
+      PS_HANDLE_DYNAMIC_DOMAIN: "1"
+      PS_LANGUAGE: en
+      PS_COUNTRY: US
+      # PrestaShop 9.2 auto-removes a root folder named exactly "install", which
+      # then makes the image's own `rm -r` fail under `set -e` before Apache starts.
+      # "install-dev" is deliberately excluded from the auto-removal.
+      PS_FOLDER_INSTALL: install-dev
+      # Must differ from "admin": the image then pre-renames the folder with `mv`
+      # (which survives overlayfs), avoiding the installer's `rename()` EXDEV failure.
+      # "admin-dev" is also the folder name the installer's finalize step expects.
+      PS_FOLDER_ADMIN: admin-dev
+      ADMIN_MAIL: admin@example.com
+      ADMIN_PASSWD: admin1234
+    ports:
+      - "8080:80"
+    volumes:
+      # The module under test, installed into the shop.
+      - ./llmscatalog:/var/www/html/modules/llmscatalog
+      # The repository, so PHPUnit can run inside the container against the shop.
+      - ./:/workspace

@@ -18,7 +18,7 @@ final class TranslationCatalogTest extends TestCase
         'LLMs.txt for PrestaShop', 'Publishes a localized, machine-readable catalog index for generative engines.',
         'Publish llms.txt', 'Maximum products', 'Maximum output bytes', 'Cache TTL in seconds',
         'Include categories', 'Include products', 'Include public prices', 'Include availability',
-        'Inject HTML discovery links', 'Title (%locale%)', 'Summary (%locale%)', 'Save',
+        'Publish discovery metadata on catalog pages', 'Title (%locale%)', 'Summary (%locale%)', 'Save',
         'LLMs.txt settings updated.', 'These settings apply to all shops.',
         'This module publishes deterministic public catalog information. It does not guarantee AI-search inclusion or ranking.',
     ];

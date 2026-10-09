@@ -23,6 +23,6 @@ final class RootIndexGeneratorTest extends TestCase
             ['id' => 1, 'locale' => 'en-US', 'label' => 'English ](https://evil.test)', 'url' => 'https://example.test/en-US/llms.txt', 'default' => true],
         ]);
         self::assertStringContainsString('# \\# Shop \\[x\\]', $body);
-        self::assertStringContainsString('English \\](https://evil.test\\)', $body);
+        self::assertStringContainsString('English \\](https://evil.test)', $body);
     }
 }
