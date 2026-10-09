@@ -89,13 +89,31 @@ class AvailabilityProvider
         $fallback = ['in_stock' => 'In stock', 'backorder' => 'Available on backorder', 'out_of_stock' => 'Out of stock'];
         $module = \Module::getInstanceByName('llmscatalog');
         foreach (['in_stock' => 'available_now', 'backorder' => 'available_later', 'out_of_stock' => 'available_later'] as $state => $field) {
-            $value = $combinationId ? \Db::getInstance()->getValue('SELECT ' . $field . ' FROM `' . _DB_PREFIX_ . 'product_attribute` WHERE id_product_attribute = ' . $combinationId) : '';
+            // PrestaShop 9 removed the per-combination labels, so on those schemas we
+            // rely on the product-level field; older schemas keep the override.
+            $value = $combinationId && $this->attributeHasLabelColumn($field)
+                ? \Db::getInstance()->getValue('SELECT ' . $field . ' FROM `' . _DB_PREFIX_ . 'product_attribute` WHERE id_product_attribute = ' . $combinationId)
+                : '';
             if (!$value) $value = $product->$field;
             if (is_array($value)) $value = $value[$langId] ?? '';
             $labels[$state] = trim((string) $value) ?: (trim((string) $configured[$state]) ?: $this->translate($module, $fallback[$state], $langId));
         }
         $labels['not_for_sale'] = $this->translate($module, 'Not available for order', $langId);
         return $labels;
+    }
+
+    private static array $attributeLabelColumns = [];
+
+    private function attributeHasLabelColumn(string $column): bool
+    {
+        if (!array_key_exists($column, self::$attributeLabelColumns)) {
+            $rows = \Db::getInstance()->executeS(
+                'SHOW COLUMNS FROM `' . _DB_PREFIX_ . 'product_attribute` LIKE "' . pSQL($column) . '"'
+            );
+            self::$attributeLabelColumns[$column] = is_array($rows) && $rows !== [];
+        }
+
+        return self::$attributeLabelColumns[$column];
     }
 
     private function translate($module, string $text, int $langId): string

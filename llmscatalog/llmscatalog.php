@@ -4,19 +4,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-spl_autoload_register(static function ($class) {
-    $prefix = 'LlmsCatalog\\';
-    if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
-        return;
-    }
-
-    $relative = substr($class, strlen($prefix));
-    $file = __DIR__ . '/src/' . str_replace('\\', '/', $relative) . '.php';
-    if (is_file($file)) {
-        require_once $file;
-    }
-});
-
 use LlmsCatalog\Service\CacheManager;
 use LlmsCatalog\Service\CatalogRepository;
 use LlmsCatalog\Service\LlmsGenerator;
@@ -24,6 +11,12 @@ use LlmsCatalog\Service\MarkdownRenderer;
 use LlmsCatalog\Service\Settings;
 use LlmsCatalog\Service\UrlBuilder;
 use LlmsCatalog\Service\PublicPriceContextFactory;
+
+// PrestaShop only auto-loads a module's Composer autoloader for modules that are
+// already installed (see ContainerBuilder::loadModulesAutoloader). Load it
+// explicitly so the module classes resolve during the very first install, before
+// the container knows about the module, and on builds that don't load it at all.
+require_once __DIR__ . '/vendor/autoload.php';
 
 class LlmsCatalog extends Module
 {
@@ -35,7 +28,7 @@ class LlmsCatalog extends Module
     {
         $this->name = 'llmscatalog';
         $this->tab = 'seo';
-        $this->version = '1.3.0';
+        $this->version = '1.3.1';
         $this->author = 'LLMs.txt for PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -50,6 +43,18 @@ class LlmsCatalog extends Module
     public function isUsingNewTranslationSystem(): bool
     {
         return true;
+    }
+
+    /**
+     * Expose the module translation helper.
+     *
+     * ModuleCore::trans() is protected in PrestaShop 9, but module services such as
+     * TranslationResolver need to call it. Increasing the visibility in the child
+     * class keeps the existing behaviour and works across supported versions.
+     */
+    public function trans($id, array $parameters = [], $domain = null, $locale = null)
+    {
+        return parent::trans($id, $parameters, $domain, $locale);
     }
 
     public function install(): bool
@@ -154,7 +159,7 @@ class LlmsCatalog extends Module
                 'keywords' => [
                     'llms_lang' => $localeKeyword,
                 ],
-                'controller' => 'index',
+                'controller' => 'catalogindex',
                 'params' => [
                     'fc' => 'module',
                     'module' => $this->name,
@@ -186,7 +191,7 @@ class LlmsCatalog extends Module
         ];
         // PrestaShop strips one leading ISO segment before matching module routes.
         // These explicit forms keep the remaining nested-language legacy paths routable.
-        foreach (['index' => 'llms.txt', 'product' => 'llms/product/{id_product}/{rewrite}.md'] as $kind => $tail) {
+        foreach (['catalogindex' => 'llms.txt', 'product' => 'llms/product/{id_product}/{rewrite}.md'] as $kind => $tail) {
             $controller = $kind;
             $rule = '{outer_lang}/{llms_lang}/' . $tail;
             $routes['module-llmscatalog-legacy-double-' . $kind] = [
@@ -455,7 +460,16 @@ class LlmsCatalog extends Module
 
     private function installTab(): bool
     {
-        if ((int) Tab::getIdFromClassName('AdminLlmsCatalog') > 0) {
+        $parentId = $this->adminTabParentId();
+        $existingId = (int) Tab::getIdFromClassName('AdminLlmsCatalog');
+        if ($existingId > 0) {
+            $tab = new Tab($existingId);
+            // Repair tabs installed under AdminModulesManage/AdminModulesSf,
+            // which made the Module Manager menu open this configuration page.
+            if ($parentId > 0 && (int) $tab->id_parent !== $parentId) {
+                $tab->id_parent = $parentId;
+                return (bool) $tab->update();
+            }
             return true;
         }
 
@@ -463,13 +477,36 @@ class LlmsCatalog extends Module
         $tab->active = 1;
         $tab->class_name = 'AdminLlmsCatalog';
         $tab->module = $this->name;
-        $tab->id_parent = (int) Tab::getIdFromClassName('AdminModules');
+        $tab->id_parent = $parentId;
 
         foreach (Language::getLanguages(true) as $language) {
             $tab->name[(int) $language['id_lang']] = $this->trans('LLMs.txt for PrestaShop', [], 'Modules.Llmscatalog.Admin', (string) $language['locale']);
         }
 
         return (bool) $tab->add();
+    }
+
+    /**
+     * Resolve a valid "Modules" menu parent across PrestaShop 9.x builds.
+     *
+     * The legacy "AdminModules" tab no longer exists in PrestaShop 9, which left
+     * the module tab orphaned at the menu root. Attach the tab to the "Modules"
+     * parent (AdminParentModulesSf) so it becomes a sibling of the Module Manager
+     * tab. PrestaShop's nav bar builds a parent tab link from its first active
+     * child, so attaching this tab under AdminModulesManage/AdminModulesSf makes
+     * "Module Manager" open this module's configuration page instead of the
+     * module list, trapping the merchant on the configuration page.
+     */
+    private function adminTabParentId(): int
+    {
+        foreach (['AdminParentModulesSf', 'AdminModulesSf', 'AdminModulesManage'] as $className) {
+            $idTab = (int) Tab::getIdFromClassName($className);
+            if ($idTab > 0) {
+                return $idTab;
+            }
+        }
+
+        return 0;
     }
 
     private function uninstallTab(): void

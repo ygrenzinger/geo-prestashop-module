@@ -574,7 +574,7 @@ llmscatalog/src/Service/CatalogRepository.php
 llmscatalog/src/Service/LlmsGenerator.php
 llmscatalog/src/Service/UrlBuilder.php
 llmscatalog/src/Service/CacheManager.php
-llmscatalog/controllers/front/index.php
+llmscatalog/controllers/front/catalogindex.php
 llmscatalog/controllers/front/product.php
 phpunit.xml.dist
 ```

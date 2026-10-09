@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>llmscatalog</name>
+    <displayName><![CDATA[LLMs.txt for PrestaShop]]></displayName>
+    <version><![CDATA[1.3.1]]></version>
+    <description><![CDATA[Publishes a localized, machine-readable catalog index for generative engines.]]></description>
+    <author><![CDATA[LLMs.txt for PrestaShop]]></author>
+    <tab><![CDATA[seo]]></tab>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+</module>

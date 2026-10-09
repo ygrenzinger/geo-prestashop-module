@@ -10,6 +10,7 @@ final class SafeDiagnosticLogger
         $operation = preg_replace('/[^a-z0-9._-]/i', '-', $operation) ?: 'unknown';
         $operation = substr($operation, 0, 48);
         $error = substr(basename(str_replace('\\', '/', get_class($exception))), 0, 64);
+        $detail = substr(preg_replace('/\s+/', ' ', (string) $exception->getMessage()), 0, 400);
 
         try {
             if (!class_exists('PrestaShopLogger')) {
@@ -17,7 +18,7 @@ final class SafeDiagnosticLogger
             }
 
             \PrestaShopLogger::addLog(
-                sprintf('llmscatalog operation=%s shop=%d error=%s', $operation, max(0, $shopId), $error),
+                sprintf('llmscatalog operation=%s shop=%d error=%s detail=%s', $operation, max(0, $shopId), $error, $detail),
                 $severity
             );
         } catch (\Throwable $loggingFailure) {

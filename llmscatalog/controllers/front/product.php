@@ -1,5 +1,6 @@
 <?php
 
+use LlmsCatalog\Service\CookiePolicy;
 use LlmsCatalog\Service\PublicDocumentApplicationService;
 use LlmsCatalog\Service\PublicResponseEmitter;
 use LlmsCatalog\ValueObject\PublicDocument;
@@ -12,7 +13,7 @@ class LlmsCatalogProductModuleFrontController extends ModuleFrontController
 
     public function initContent()
     {
-        if (class_exists('Cookie')) Cookie::disallowWriting();
+        CookiePolicy::disallowWriting();
         header_remove('Set-Cookie');
         $module = Module::getInstanceByName('llmscatalog');
         $this->document = (new PublicDocumentApplicationService())->product($this->context, $module);

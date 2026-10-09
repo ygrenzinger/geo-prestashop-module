@@ -157,7 +157,7 @@ coverage.
 Featured content follows existing merchant ordering:
 
 - featured categories: category depth, merchant position, category ID;
-- featured products: `product_shop.position`, product ID.
+- featured products: product ID (PrestaShop 9 removed the per-shop product position).
 
 This preserves the current curation signal. Explicit pins, sales ranking,
 popularity, personalization, or automated business scoring are deferred.

@@ -24,7 +24,7 @@ final class PublicDocumentApplicationService
             $message = $module ? $this->translatedError($module, $context, 'Not found') : 'Not found';
             return new PublicDocument($message . "\n", self::TEXT, 0, 404, false);
         }
-        if ($language->needsCanonicalRedirect || !$urls->isCanonicalRequest($language->locale, 'index')) {
+        if ($language->needsCanonicalRedirect || !$urls->isCanonicalRequest($language->locale, 'catalogindex')) {
             $canonical = $urls->indexUrl($languageId);
             return new PublicDocument('', self::TEXT, $languageId, 301, false, 0, [
                 'Location' => $canonical . $urls->redirectQuery(),
@@ -73,7 +73,7 @@ final class PublicDocumentApplicationService
         }
         if ($product === null) return new PublicDocument("Product not found\n", self::MARKDOWN, $languageId, 404, false);
 
-        $rewrite = \Tools::link_rewrite((string) $product['link_rewrite']);
+        $rewrite = \Tools::str2url((string) $product['link_rewrite']);
         if ($rewrite === '' || !\Validate::isLinkRewrite($rewrite)) {
             return new PublicDocument("Product not found\n", self::MARKDOWN, $languageId, 404, false);
         }

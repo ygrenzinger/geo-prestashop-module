@@ -65,6 +65,13 @@ class CacheDocumentStore
                 'settings_revision' => $snapshot['settings'], 'global_pricing_revision' => $snapshot['global_pricing'], 'shop_index_revision' => $snapshot['index'],
                 'shop_pricing_revision' => $snapshot['pricing'], 'shop_routing_revision' => $snapshot['routing'], 'product_revision' => $snapshot['product'], 'updated_at' => gmdate('Y-m-d H:i:s'),
             ];
+            // PrestaShop 9's Db::insert() no longer escapes values, so escape text here.
+            // html_ok=true keeps the stored markdown intact instead of stripping tags.
+            foreach ($values as $column => $value) {
+                if (is_string($value)) {
+                    $values[$column] = pSQL($value, true);
+                }
+            }
             if (!$db->insert('llmscatalog_cache_document', $values, false, true, Db::REPLACE)) return false;
             self::$memo[$key] = ['body' => $record['body'], 'etag' => '"sha256-' . $hash . '"', 'expires_at' => $fresh, 'generated_at' => $generated];
             $db->execute('DELETE FROM `' . _DB_PREFIX_ . 'llmscatalog_cache_document` WHERE stale_until < UTC_TIMESTAMP() LIMIT 100');

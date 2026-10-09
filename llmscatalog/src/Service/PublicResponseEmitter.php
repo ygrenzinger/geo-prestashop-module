@@ -9,7 +9,7 @@ class PublicResponseEmitter
 {
     public function emit(PublicDocument $document): void
     {
-        if (class_exists('Cookie')) \Cookie::disallowWriting();
+        CookiePolicy::disallowWriting();
         header_remove('Set-Cookie');
         $status = $document->status; $headers = $document->headers;
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));

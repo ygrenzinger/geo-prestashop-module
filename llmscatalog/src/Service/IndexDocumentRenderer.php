@@ -113,7 +113,7 @@ class IndexDocumentRenderer
 
     private function categoryUrl(int $idCategory, string $rewrite, int $langId): string
     {
-        return $this->context->link->getCategoryLink($idCategory, Tools::link_rewrite($rewrite), $langId);
+        return $this->context->link->getCategoryLink($idCategory, Tools::str2url($rewrite), $langId);
     }
 
     private function observeFallback(FallbackTracker $tracker, array $row, int $requestedLanguageId): void

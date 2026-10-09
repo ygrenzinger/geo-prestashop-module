@@ -268,7 +268,7 @@ Product identity is the validated integer product ID. The rewrite is a canonical
 For a public product:
 
 1. Read the effective localized `link_rewrite` using the existing field-level fallback to the shop default language.
-2. Normalize it with `Tools::link_rewrite()`.
+2. Normalize it with `Tools::str2url()`.
 3. Require a non-empty value accepted by PrestaShop's link-rewrite rules.
 4. Build the canonical Markdown URL with that normalized value.
 5. Compare the requested decoded segment with the canonical segment.

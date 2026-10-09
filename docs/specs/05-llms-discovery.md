@@ -666,7 +666,7 @@ docs/architecture.md
 docs/testing-and-operations.md
 llmscatalog/llmscatalog.php
 llmscatalog/controllers/front/root.php
-llmscatalog/controllers/front/index.php
+llmscatalog/controllers/front/catalogindex.php
 llmscatalog/controllers/front/product.php
 llmscatalog/src/Service/Settings.php
 llmscatalog/src/Service/UrlBuilder.php

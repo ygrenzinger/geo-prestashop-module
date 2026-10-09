@@ -342,7 +342,7 @@ Additional rules:
 
 - Do not send `Vary: Cookie`.
 - Preserve infrastructure-added `Vary: Accept-Encoding` where applicable.
-- Call `Cookie::disallowWriting()` before generation.
+- Call `disallowWriting()` on the context cookie before generation.
 - Remove any `Set-Cookie` header before sending the response.
 - Support only `GET` and `HEAD`.
 - `HEAD` returns the same headers as `GET` without a body.
@@ -396,7 +396,7 @@ cookies, or cart data in public output.
 | `llmscatalog/src/Service/CacheManager.php` | Use the persistent backend, v2 keys, generation-based invalidation, TTL records, and graceful bypass. |
 | `llmscatalog/src/Service/UrlBuilder.php` | Resolve exact current-shop languages and reject invalid codes. |
 | `llmscatalog/src/Service/PublicResponseEmitter.php` | Centralize methods, ETags, 304/HEAD behavior, headers, no-store errors, and cookie suppression. |
-| `llmscatalog/controllers/front/index.php` | Become a thin raw-document controller using the response emitter. |
+| `llmscatalog/controllers/front/catalogindex.php` | Become a thin raw-document controller using the response emitter. |
 | `llmscatalog/controllers/front/product.php` | Use the same response pipeline and cache policy. |
 | `llmscatalog/src/Service/Settings.php` | Add cache-generation access and bumping; preserve existing merchant settings. |
 | `llmscatalog/upgrade/upgrade-1.1.0.php` | Register new hooks, initialize generation, and invalidate old cache entries without deleting merchant settings. |

@@ -40,11 +40,11 @@ final class CatalogPageGenerator
         $category=$category??$this->catalog->category($categoryId,$langId); if($category===null)return '';
         $renderer=new MarkdownRenderer(); $name=$this->unicodeLimit(trim((string)($category['name']??''))?:'Category #'.$categoryId,200);
         $rewrite=(string)($category['link_rewrite']??'category-'.$categoryId);
-        $html=Context::getContext()->link->getCategoryLink($categoryId,\Tools::link_rewrite($rewrite),$langId);
+        $html=Context::getContext()->link->getCategoryLink($categoryId,\Tools::str2url($rewrite),$langId);
         $count=$this->catalog->categoryProductCount($categoryId,$langId);
         $lines=['# '.$renderer->text($name),'','- Canonical URL: '.$html];
         if((int)($category['id_parent']??0)>2 && trim((string)($category['parent_name']??''))!==''){
-            $parent=Context::getContext()->link->getCategoryLink((int)$category['id_parent'],\Tools::link_rewrite((string)($category['parent_rewrite']??'')),$langId);
+            $parent=Context::getContext()->link->getCategoryLink((int)$category['id_parent'],\Tools::str2url((string)($category['parent_rewrite']??'')),$langId);
             $lines[]='- Parent category: '.$renderer->link((string)$category['parent_name'],$parent);
         }
         $lines[]='- Eligible products: '.$count; $lines[]=''; $lines[]='[Products in this category]('.$this->urls->categoryProductsUrl($langId,$categoryId,$rewrite).')'; $lines[]='';

@@ -42,7 +42,7 @@ class CatalogRepository
         $query->where('COALESCE(NULLIF(pl.link_rewrite, ""), pld.link_rewrite) IS NOT NULL');
         $publicGroupId = $this->publicGroupId($shopId);
         $query->where('EXISTS (SELECT 1 FROM ' . _DB_PREFIX_ . 'category_product cp INNER JOIN ' . _DB_PREFIX_ . 'category cpub ON cpub.id_category = cp.id_category INNER JOIN ' . _DB_PREFIX_ . 'category_shop cspub ON cspub.id_category = cp.id_category AND cspub.id_shop = ' . $shopId . ' INNER JOIN ' . _DB_PREFIX_ . 'category_group cgp ON cgp.id_category = cp.id_category AND cgp.id_group = ' . $publicGroupId . ' WHERE cp.id_product = p.id_product AND cpub.active = 1)');
-        $query->orderBy('ps.position ASC, p.id_product ASC');
+        $query->orderBy('p.id_product ASC');
         $query->limit($limit);
 
         $products = Db::getInstance()->executeS($query);

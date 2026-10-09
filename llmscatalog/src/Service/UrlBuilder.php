@@ -23,7 +23,7 @@ class UrlBuilder
 
     public function indexUrl(int $langId): string
     {
-        return $this->moduleUrl('index', $langId);
+        return $this->moduleUrl('catalogindex', $langId);
     }
 
     public function rootIndexUrl(): string
@@ -33,8 +33,8 @@ class UrlBuilder
 
     public function catalogProductsUrl(int $langId, int $cursor = 0): string { return $this->catalogPath($langId, 'catalog/products/after/' . max(0, $cursor) . '.md'); }
     public function catalogCategoriesUrl(int $langId, int $cursor = 0): string { return $this->catalogPath($langId, 'catalog/categories/after/' . max(0, $cursor) . '.md'); }
-    public function categoryMarkdownUrl(int $langId, int $id, string $rewrite): string { return $this->catalogPath($langId, 'category/' . (int)$id . '/' . rawurlencode(Tools::link_rewrite($rewrite ?: 'category-' . $id)) . '.md'); }
-    public function categoryProductsUrl(int $langId, int $id, string $rewrite, int $cursor = 0): string { return $this->catalogPath($langId, 'category/' . (int)$id . '/' . rawurlencode(Tools::link_rewrite($rewrite ?: 'category-' . $id)) . '/products/after/' . max(0,$cursor) . '.md'); }
+    public function categoryMarkdownUrl(int $langId, int $id, string $rewrite): string { return $this->catalogPath($langId, 'category/' . (int)$id . '/' . rawurlencode(Tools::str2url($rewrite ?: 'category-' . $id)) . '.md'); }
+    public function categoryProductsUrl(int $langId, int $id, string $rewrite, int $cursor = 0): string { return $this->catalogPath($langId, 'category/' . (int)$id . '/' . rawurlencode(Tools::str2url($rewrite ?: 'category-' . $id)) . '/products/after/' . max(0,$cursor) . '.md'); }
     private function catalogPath(int $langId, string $tail): string
     {
         $base=rtrim($this->baseLink(),'/'); $locale=$this->canonicalLocale($langId);
@@ -64,7 +64,7 @@ class UrlBuilder
     {
         return $this->context->link->getProductLink(
             $idProduct,
-            Tools::link_rewrite($rewrite),
+            Tools::str2url($rewrite),
             null,
             null,
             $langId,
@@ -140,7 +140,7 @@ class UrlBuilder
         }
         $rawPath = (string) parse_url($uri, PHP_URL_PATH);
         $basePath = (string) parse_url($this->context->link->getBaseLink((int) $this->context->shop->id, true), PHP_URL_PATH);
-        $expected = '/' . $locale . '/llms' . ($controller === 'index' ? '.txt' : '/product/' . $idProduct . '/' . $rewrite . '.md');
+        $expected = '/' . $locale . '/llms' . ($controller === 'catalogindex' ? '.txt' : '/product/' . $idProduct . '/' . $rewrite . '.md');
         return (new CanonicalRequestResolver())->canonicalPath($rawPath, $basePath, $expected);
     }
 
@@ -152,20 +152,20 @@ class UrlBuilder
         $base = rtrim($this->baseLink(), '/');
         $friendly = (bool) \Configuration::get('PS_REWRITING_SETTINGS', null, (int) $this->context->shop->id_shop_group, $shopId);
         if ($friendly) {
-            $route = $controller === 'index' ? 'module-llmscatalog-index' : 'module-llmscatalog-product';
+            $route = $controller === 'catalogindex' ? 'module-llmscatalog-index' : 'module-llmscatalog-product';
             $params = ['llms_lang' => $locale];
             if ($controller === 'product') {
                 $params['id_product'] = $idProduct;
-                $params['rewrite'] = rawurlencode(Tools::link_rewrite($rewrite));
+                $params['rewrite'] = rawurlencode(Tools::str2url($rewrite));
             }
             $path = \Dispatcher::getInstance()->createUrl($route, $langId, $params, false, '', $shopId);
             return $base . '/' . ltrim($path, '/');
         }
-        $route = $controller === 'index' ? 'module-llmscatalog-index' : 'module-llmscatalog-product';
+        $route = $controller === 'catalogindex' ? 'module-llmscatalog-index' : 'module-llmscatalog-product';
         $params = ['llms_lang' => $locale];
         if ($controller === 'product') {
             $params['id_product'] = $idProduct;
-            $params['rewrite'] = Tools::link_rewrite($rewrite);
+            $params['rewrite'] = Tools::str2url($rewrite);
         }
         // Ask Dispatcher for its native query-form controller route, then
         // replace its ISO language identity with the module-owned full locale.
@@ -179,7 +179,7 @@ class UrlBuilder
         ];
         if ($controller === 'product') {
             $query['id_product'] = $idProduct;
-            $query['rewrite'] = Tools::link_rewrite($rewrite);
+            $query['rewrite'] = Tools::str2url($rewrite);
         }
         return $base . '/index.php?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }

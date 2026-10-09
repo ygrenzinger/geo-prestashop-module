@@ -22,7 +22,7 @@ final class DiscoveryLinkBuilder
             if ($idProduct <= 0) return [];
             $product = (new CatalogRepository($context))->product($idProduct, $languageId);
             if ($product === null) return [];
-            $rewrite = \Tools::link_rewrite((string) $product['link_rewrite']);
+            $rewrite = \Tools::str2url((string) $product['link_rewrite']);
             if ($rewrite === '' || !\Validate::isLinkRewrite($rewrite)) return [];
             try {
                 $module = \Module::getInstanceByName('llmscatalog');

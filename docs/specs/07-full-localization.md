@@ -563,7 +563,7 @@ the response.
 ## Existing files to update
 
 - `llmscatalog/llmscatalog.php`
-- `llmscatalog/controllers/front/index.php`
+- `llmscatalog/controllers/front/catalogindex.php`
 - `llmscatalog/controllers/front/product.php`
 - `llmscatalog/src/Controller/Admin/ConfigurationController.php`
 - `llmscatalog/src/Service/CatalogRepository.php`

@@ -159,6 +159,16 @@ class ConfigurationController extends PrestaShopAdminController
 
         return $this->render('@Modules/llmscatalog/views/templates/admin/configuration.html.twig', [
             'form' => $form->createView(),
+            // Mirror the standard module configuration page so the merchant always
+            // has an explicit way back to the module list.
+            'layoutHeaderToolbarBtn' => [
+                'module-back' => [
+                    'href' => $this->generateUrl('admin_module_manage'),
+                    'desc' => $this->trans('Back', [], 'Admin.Global'),
+                    'icon' => 'arrow_back',
+                    'help' => $this->trans('Module Manager', [], 'Admin.Navigation.Menu'),
+                ],
+            ],
             'can_update_settings' => $this->isGranted('update', (string) $request->attributes->get('_legacy_controller')),
             'shop_name' => (string) Configuration::get('PS_SHOP_NAME'),
             'root_index_url' => $urls->rootIndexUrl(),

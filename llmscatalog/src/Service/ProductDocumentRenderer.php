@@ -108,7 +108,7 @@ class ProductDocumentRenderer
     private function contextImageUrl(array $details, array $image, array $product): string
     {
         $context=$this->context; $id=(int)$image['id'];
-        $link=$context->link->getImageLink(Tools::link_rewrite((string)$product['link_rewrite']), (string)$id, 'large_default');
+        $link=$context->link->getImageLink(Tools::str2url((string)$product['link_rewrite']), (string)$id, 'large_default');
         if (strpos($link,'http://')===0 || strpos($link,'https://')===0) return $link;
         return rtrim($this->urls->baseLink(),'/').'/img/p/'.implode('/',str_split((string)$id)).'/'.$id.'-large_default.jpg';
     }

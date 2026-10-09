@@ -30,7 +30,7 @@ final class LinkHeaderBuilder
         foreach ($alternates as $locale => $id) {
             $product = $urls->productData($productId, $id);
             if ($product === null) continue;
-            $rewrite = \Tools::link_rewrite((string) $product['link_rewrite']);
+            $rewrite = \Tools::str2url((string) $product['link_rewrite']);
             if ($rewrite === '' || !\Validate::isLinkRewrite($rewrite)) continue;
             $productByLanguage[$id] = $rewrite;
             $links[] = '<' . $urls->productMarkdownUrl($productId, $rewrite, $id) . '>; rel="alternate"; hreflang="' . $locale . '"; type="text/markdown"';

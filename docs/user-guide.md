@@ -7,7 +7,7 @@
 3. Open the module configuration page and review the settings and generated URLs.
 4. Clear PrestaShop/Symfony routing caches if routes were previously cached.
 
-The source declares version 1.3.0 and minimum PrestaShop 9.0.2. Upgrades add missing settings, preserve existing values, create cache/revision storage idempotently, and invalidate old representations. Do not downgrade a shop whose recorded module version is greater than this source version without checking its deployment history. Uninstall removes module configuration and its cache/revision tables.
+The source declares version 1.3.1 and minimum PrestaShop 9.0.2. Upgrades add missing settings, preserve existing values, create cache/revision storage idempotently, and invalidate old representations. Do not downgrade a shop whose recorded module version is greater than this source version without checking its deployment history. Uninstall removes module configuration and its cache/revision tables.
 
 ## Configuration
 
@@ -70,6 +70,7 @@ Before enabling JSON-LD augmentation, run a complete audit for the current shop/
 - **No discovery relations:** enable discovery metadata and inspect both rendered HTML and response `Link` headers; product Markdown's own relation remains intrinsic.
 - **Audit cannot fetch a page:** verify the URL resolves to an authorized shop host and responds within fetch bounds; arbitrary/external hosts are intentionally rejected.
 - **Augmentation cannot be enabled:** complete the current audit, address blocker findings, then review and confirm the preview.
+- **Module Manager menu opens the configuration page:** versions before 1.3.1 attached the configuration tab to the module-manager tab, so the "Module Manager" menu link led back to this module's settings instead of the module list. Upgrade to 1.3.1 (or reinstall) to reparent the tab; the configuration page also exposes a **Back** button to the module list.
 
 ## Rollback
 
