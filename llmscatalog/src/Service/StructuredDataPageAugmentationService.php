@@ -76,7 +76,7 @@ final class StructuredDataPageAugmentationService
             if ($productCandidateAllowed) {
                 $candidate = $this->productCandidate($context, $productId, $product, $details, $languageId);
                 if ($candidate !== null) {
-                    $params['html'] = $augmenter->augment($params['html'], $candidate, 'Product', true);
+                    $params['html'] = $augmenter->augmentProduct($params['html'], $candidate, true);
                 }
             }
 
@@ -125,13 +125,6 @@ final class StructuredDataPageAugmentationService
 
     private function productCandidate(Context $context, int $productId, array $product, array $details, int $languageId): ?array
     {
-        if (($details['type'] ?? '') !== 'physical'
-            || !empty($product['availability']['combination_id'])
-            || !empty($product['availability']['other_variants_orderable'])
-            || empty($details['images'])) {
-            return null;
-        }
-
         $canonical = (new UrlBuilder($context))->productHtmlUrl($productId, (string) $product['link_rewrite'], $languageId);
         $images = [];
         foreach ($details['images'] as $imageRow) {
@@ -140,19 +133,16 @@ final class StructuredDataPageAugmentationService
                 $images[] = $context->link->getImageLink((string) $product['link_rewrite'], (int) $image->id, 'large_default');
             }
         }
-        if (!$images) {
-            return null;
-        }
-
-        $availability = (string) ($product['availability']['schema_url'] ?? '');
-        if (!in_array($availability, [
-            'https://schema.org/InStock',
-            'https://schema.org/OutOfStock',
-            'https://schema.org/BackOrder',
-            'https://schema.org/Discontinued',
-        ], true)) {
-            return null;
-        }
+        $combinationProduct = !empty($details['variants'])
+            || !empty($product['availability']['combination_id'])
+            || !empty($product['availability']['other_variants_orderable']);
+        $priceContext = (new PublicPriceContextFactory())->create($context, $languageId);
+        $currency = (string) $priceContext->get('currency_iso');
+        $precision = (int) $priceContext->get('currency_precision');
+        $offer = $combinationProduct
+            ? $this->aggregateOffer($context, $productId, $languageId, $product, $priceContext, $precision)
+            : $this->singleOffer($context, $productId, $product, $priceContext, $precision);
+        if ($offer === null || $currency === '') return null;
 
         $condition = [
             'new' => 'NewCondition',
@@ -165,15 +155,9 @@ final class StructuredDataPageAugmentationService
             '@id' => $canonical . '#product',
             'name' => (string) $product['name'],
             'url' => $canonical,
-            'image' => $images,
-            'offers' => [
-                '@type' => 'Offer',
-                'url' => $canonical,
-                'price' => (string) $product['price'],
-                'priceCurrency' => (string) $product['currency'],
-                'availability' => $availability,
-            ],
+            'offers' => $offer,
         ];
+        if ($images) $candidate['image']=$images;
         if ($condition !== null) {
             $candidate['offers']['itemCondition'] = 'https://schema.org/' . $condition;
         }
@@ -193,6 +177,52 @@ final class StructuredDataPageAugmentationService
         }
 
         return $candidate;
+    }
+
+    private function singleOffer(Context $context,int $productId,array $product,\LlmsCatalog\ValueObject\PublicPriceContext $priceContext,int $precision): ?array
+    {
+        $availability=(string)($product['availability']['schema_url']??'');
+        if (!in_array($availability,['https://schema.org/InStock','https://schema.org/OutOfStock','https://schema.org/BackOrder','https://schema.org/Discontinued'],true)
+            || !is_numeric($product['price']??null) || !empty($product['price_degraded'])) return null;
+        $canonical=(new UrlBuilder($context))->productHtmlUrl($productId,(string)$product['link_rewrite'],(int)$context->language->id);
+        return ['@type'=>'Offer','url'=>$canonical,'price'=>$this->schemaPrice((float)$product['price'],$precision),'priceCurrency'=>(string)$priceContext->get('currency_iso'),'availability'=>$availability];
+    }
+
+    private function aggregateOffer(Context $context,int $productId,int $languageId,array $product,\LlmsCatalog\ValueObject\PublicPriceContext $priceContext,int $precision): ?array
+    {
+        $shopId=(int)$context->shop->id;
+        $settings=new Settings();
+        $limit=$settings->productLimit('variants');
+        $rows=\Db::getInstance()->executeS('SELECT pa.id_product_attribute FROM `'._DB_PREFIX_.'product_attribute` pa INNER JOIN `'._DB_PREFIX_.'product_attribute_shop` pas ON pas.id_product_attribute=pa.id_product_attribute AND pas.id_shop='.(int)$shopId.' WHERE pa.id_product='.(int)$productId.' ORDER BY pa.id_product_attribute ASC LIMIT '.($limit+1));
+        if (!is_array($rows) || !$rows || count($rows)>$limit) return null;
+        $productObject=new Product($productId,false,$languageId,$shopId);
+        if (!\Validate::isLoadedObject($productObject)) return null;
+        $calculator=new PublicPriceCalculator($context,new AnonymousContextRunner());
+        $availabilityProvider=new AvailabilityProvider();
+        $catalogMode=(bool)Configuration::get('PS_CATALOG_MODE',null,(int)$context->shop->id_shop_group,$shopId);
+        $variantOffers=[];
+        foreach ($rows as $row) {
+            $combinationId=(int)($row['id_product_attribute']??0);
+            if ($combinationId<1) return null;
+            try {
+                $price=$calculator->calculate($productId,$priceContext,$combinationId);
+                if (!is_numeric($price['amount']??null) || !is_finite((float)$price['amount'])) return null;
+                if ((string)($price['currency']??'')!==(string)$priceContext->get('currency_iso')) return null;
+                $amount=(float)$price['amount'];
+                $availability=$availabilityProvider->forCombination($productObject,$combinationId,$shopId,$catalogMode,(bool)$product['show_price'],$languageId);
+                $variantOffers[]=['amount'=>$amount,'currency'=>(string)$price['currency'],'availability'=>$availability->state];
+            } catch (\Throwable $exception) {
+                SafeDiagnosticLogger::log('public.structured-data.variant-offer',$shopId,$exception);
+                return null;
+            }
+        }
+        $canonical=(new UrlBuilder($context))->productHtmlUrl($productId,(string)$product['link_rewrite'],$languageId);
+        return (new AggregateOfferBuilder())->build($canonical,$variantOffers,(string)$priceContext->get('currency_iso'),$precision,$limit);
+    }
+
+    private function schemaPrice(float $amount,int $precision): string
+    {
+        return number_format(round($amount,max(0,min(6,$precision))),max(0,min(6,$precision)),'.','');
     }
 
     private function breadcrumbCandidate(

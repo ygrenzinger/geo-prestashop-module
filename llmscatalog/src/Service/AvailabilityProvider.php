@@ -61,6 +61,27 @@ class AvailabilityProvider
         return $result;
     }
 
+    /** Resolves one shop combination for Product/AggregateOffer markup. */
+    public function forCombination(Product $product,int $combinationId,int $shopId,bool $catalogMode,bool $showPrice,?int $languageId=null): \LlmsCatalog\Availability\AvailabilityResult
+    {
+        $languageId=$languageId?: (int)\Context::getContext()->language->id;
+        $shopGroupId=(int)\Context::getContext()->shop->id_shop_group;
+        $stockManagement=(bool)\Configuration::get('PS_STOCK_MANAGEMENT',null,$shopGroupId,$shopId);
+        $quantity=0;$allow=false;$reason='';
+        try {
+            $quantity=$stockManagement?(int)Product::getQuantity((int)$product->id,$combinationId):0;
+            $allow=(bool)Product::isAvailableWhenOutOfStock(StockAvailable::outOfStock((int)$product->id,$shopId));
+        } catch (\Throwable $exception) {
+            $reason='stock_resolution_failed';
+            SafeDiagnosticLogger::log('public.availability.stock', $shopId, $exception);
+        }
+        $minimum=$this->combinationMinimum($combinationId);
+        return $this->resolver->resolve(new AvailabilityFacts(
+            (bool)$product->available_for_order,$catalogMode,$showPrice,$stockManagement,$quantity,$minimum,$allow,
+            (string)($product->available_date??''),$combinationId,false,$reason
+        ),$this->labels($product,$combinationId,$languageId));
+    }
+
     private function defaultCombinationId(int $productId, int $shopId): int
     {
         return (int) \Db::getInstance()->getValue('SELECT pa.id_product_attribute FROM `' . _DB_PREFIX_ . 'product_attribute` pa INNER JOIN `' . _DB_PREFIX_ . 'product_attribute_shop` pas ON pas.id_product_attribute = pa.id_product_attribute AND pas.id_shop = ' . $shopId . ' WHERE pa.id_product = ' . $productId . ' AND pas.default_on = 1');

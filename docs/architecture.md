@@ -106,20 +106,24 @@ and the shop/language-scoped session lifecycle through `AuditSession`, while
 `AuditResponseFactory` assembles the established JSON and download report
 shapes, and `AuditSummary` owns severity totals. `AuditFinding` and
 `AuditReport` carry public evidence, `AuditRunner` caps each batch at five
-entries and the sample at 36, and the HTML/robots/JSON-LD inspectors only read
+entries and the sample at 36, and the HTML/robots/structured-data inspectors only read
 their inputs. Feed uploads remain limited to 2 MiB and report/session state
 expires after 15 minutes. `UrlGuard` accepts HTTPS URLs only for explicitly authorized
-hosts and rejects IP literals. `StructuredDataAugmenter` adds only a wholly
-absent supported type; malformed JSON-LD, oversized documents, unsupported
-types, missing `<head>`, or an existing matching type leave the response
-unchanged. The `actionOutputHTMLBefore` method in `llmscatalog.php` is a thin
+hosts and rejects IP literals. Organization and BreadcrumbList augmentation
+remain missing-only. Product augmentation fills missing offer fields in one
+canonical JSON-LD Product entity, or adds a complete Product JSON-LD node when
+existing Microdata is incomplete. Conflicts, malformed JSON-LD, oversized
+documents, ambiguous entities, or missing `<head>` leave the response
+unchanged. The audit inspects Product JSON-LD and Microdata and reports missing
+Offer fields and variant ranges. The `actionOutputHTMLBefore` method in `llmscatalog.php` is a thin
 adapter to `StructuredDataPageAugmentationService`. That service checks the
 page type and shop-scoped opt-ins before doing page-specific reads, assembles
-public Organization, simple Product/Offer, and BreadcrumbList candidates, and
-delegates conflict checks and insertion to `StructuredDataAugmenter`. Product
-offers use the canonical anonymous public price and availability; products
-with variants, degraded prices, hidden prices, or noncanonical requests are
-not augmented. Failures restore the original HTML, and logging is guarded so
+public Organization, Product/Offer or Product/AggregateOffer, and BreadcrumbList
+candidates, and delegates conflict checks and insertion to `StructuredDataAugmenter`. Product
+offers use the canonical anonymous public price and availability; hidden or
+degraded prices and noncanonical requests are not augmented. Variant ranges
+are complete or omitted when the configured variant bound is exceeded.
+Failures restore the original HTML, and logging is guarded so
 logger failures cannot interrupt page delivery. No augmentation path fetches a
 URL. Runtime hook semantics and theme conflict behavior still require
 PrestaShop validation.

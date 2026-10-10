@@ -7,7 +7,7 @@
 3. Open the module configuration page and review the settings and generated URLs.
 4. Clear PrestaShop/Symfony routing caches if routes were previously cached.
 
-The source declares version 1.3.2 and minimum PrestaShop 9.0.2. Upgrades add missing settings, preserve existing values, create cache/revision storage idempotently, and invalidate old representations. Do not downgrade a shop whose recorded module version is greater than this source version without checking its deployment history. Uninstall removes module configuration and its cache/revision tables.
+The source declares version 1.4.0 and minimum PrestaShop 9.0.2. Upgrades add missing settings, preserve existing values, create cache/revision storage idempotently, and invalidate old representations. Do not downgrade a shop whose recorded module version is greater than this source version without checking its deployment history. Uninstall removes module configuration and its cache/revision tables.
 
 ## Configuration
 
@@ -30,7 +30,7 @@ Settings on the main publishing form are global module settings. Output remains 
 | Maximum variants / images / specifications / categories / pack items / custom fields | 50 / 8 / 50 / 10 / 50 / 25 | Bounds rich product sections; hard maxima are respectively 200 / 50 / 200 / 50 / 200 / 100. |
 | Enabled provider IDs | Empty | Up to ten validated provider identifiers, comma separated. |
 | Provider sections: ratings, shipping, returns, warranty | Off | Permits corresponding structured provider sections when available. |
-| Augment Organization / Product / Breadcrumb JSON-LD | Off per shop | Enables missing-only augmentation for supported unambiguous pages. A completed current audit with no blocker findings and preview confirmation are required before enabling. |
+| Augment Organization / Product / Breadcrumb structured data | Off per shop | Product augmentation fills missing Offer data or adds a complete canonical Product JSON-LD node; Organization and Breadcrumb remain missing-only. A completed current audit with no blocker findings and preview confirmation are required before enabling. |
 
 Internal cache generation/version values and serialized settings are not merchant-facing controls. For title/summary fallback details and rich profile contract see [rich product Markdown](rich-product-markdown.md).
 
@@ -62,7 +62,7 @@ The configuration page's audit is scoped to the current shop and language. It sa
 
 Feed comparison accepts a one-time XML or TSV snapshot up to 2 MiB. The uploaded file is processed for comparison and is not persisted as a feed. Fetching is restricted to authorized shop/feed hosts; arbitrary URLs are rejected.
 
-Before enabling JSON-LD augmentation, run a complete audit for the current shop/language, ensure it has no blocker finding, review the proposed augmentation preview and confirm the form checkbox. Augmentation is per shop, disabled by default, and missing-only: existing or malformed JSON-LD and ambiguous pages are left unchanged. It performs no network requests during page augmentation. Switches can be disabled immediately.
+Before enabling structured-data augmentation, run a complete audit for the current shop/language, ensure it has no blocker finding, review the proposed augmentation preview and confirm the form checkbox. Augmentation is per shop and disabled by default. Product augmentation fills only missing Offer fields on one canonical entity; it leaves populated conflicts, malformed JSON-LD, and ambiguous entities unchanged. When incomplete Microdata exists, the module supplements it with a canonical Product JSON-LD node. Organization and Breadcrumb augmentation remains missing-only. Variant ranges use the anonymous public price context and are omitted rather than truncated when the configured variant bound is exceeded. Page augmentation performs no network requests. Switches can be disabled immediately.
 
 ## Troubleshooting
 
@@ -76,7 +76,7 @@ Before enabling JSON-LD augmentation, run a complete audit for the current shop/
 
 ## Rollback
 
-For rich Markdown or JSON-LD augmentation, turn off the corresponding setting. To disable complete indexes, turn off that option; existing product Markdown URLs remain. To stop publication, disable the module setting or module. For code rollback, restore the prior module package, clear PrestaShop/Symfony caches, and purge CDN entries for localized index/product Markdown URLs. Version 1.3.0 cache tables are additive disposable state; the earlier module can ignore them. Uninstall removes the tables and configuration. Do not restore legacy long-lived public caching without reviewing the current cache policy.
+For rich Markdown or structured-data augmentation, turn off the corresponding setting. To disable complete indexes, turn off that option; existing product Markdown URLs remain. To stop publication, disable the module setting or module. For code rollback, restore the prior module package, clear PrestaShop/Symfony caches, and purge CDN entries for localized index/product Markdown URLs. Version 1.3.0 cache tables are additive disposable state; the earlier module can ignore them. Uninstall removes the tables and configuration. Do not restore legacy long-lived public caching without reviewing the current cache policy.
 
 ## Validation boundary
 

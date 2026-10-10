@@ -1,15 +1,15 @@
 # Ecommerce GEO foundations
 
-**Status:** Implemented locally; PHP/runtime, security, and test-shop acceptance pending. Admin UI scope is the current single-page configuration and audit interface described below.  
-**Target:** `llmscatalog` v1.3.0  
-**Date:** 2026-09-23
+**Status:** Implemented locally; PHP/runtime, security, and test-shop acceptance pending. Admin UI scope is the current single-page configuration and audit interface described below.
+**Target:** `llmscatalog` v1.4.0
+**Updated:** 2026-10-10
 
 
 > **Current UI scope:** The implemented back-office experience is one module configuration page with publishing/rich-product settings, per-shop augmentation switches, a current-shop/current-language read-only audit, cancelable batches, JSON report download, and one-time XML/TSV comparison. The save path requires a completed audit with no blocker findings and explicit preview confirmation before enabling augmentation. This interface does not implement a multi-section dashboard, interactive entity/field controls, a generated proposed-JSON-LD preview pane, persistent audit history, analytics measurement UX, or search-console integrations. References to those experiences elsewhere in this specification are future-work design guidance, not current acceptance criteria. Current acceptance covers only the implemented page and route behavior.
 
 ## 1. Context
 
-`llmscatalog` currently publishes deterministic localized catalog Markdown through `llms.txt` and product Markdown routes. Its existing contract explicitly excludes structured data, robots, XML sitemaps, and ordinary SEO work.
+`llmscatalog` publishes deterministic localized catalog Markdown through `llms.txt` and product Markdown routes. It also audits rendered structured data and offers opt-in storefront augmentation; robots, XML sitemaps, and ordinary SEO work remain outside its ownership.
 
 This specification broadens the installed module without turning it into the authoritative owner of every ecommerce SEO surface.
 
@@ -30,8 +30,8 @@ Ship one installed module with three isolated responsibilities:
 
 3. **Structured-data augmentation**
    - Optional and disabled by default.
-   - Add Product/Offer, Organization, or Breadcrumb JSON-LD only when that entity type is wholly absent from the final rendered page.
-   - Never edit, merge, replace, or “repair” structured data emitted by a theme, core feature, or another module.
+   - Complete missing Offer fields on one unambiguous canonical Product entity; supplement incomplete Microdata with a canonical Product JSON-LD node.
+   - Keep Organization and Breadcrumb JSON-LD missing-only. Never overwrite populated conflicting values or mutate malformed or ambiguous markup.
 
 The module diagnoses but never rewrites:
 
@@ -46,7 +46,7 @@ The module diagnoses but never rewrites:
 ## 3. Design principles
 
 - **Audit first:** merchants see current evidence before enabling augmentation.
-- **No duplicate ownership:** when another component owns a surface, report issues and identify that owner.
+- **Bounded ownership:** Product augmentation fills only absent Offer properties on an exact canonical entity; Organization and Breadcrumb augmentation remain wholly missing-only.
 - **Rendered-output truth:** storefront checks inspect the final HTML rather than inferring behavior from database fields alone.
 - **Public-context parity:** price, currency, availability, URLs, and visibility use the anonymous public shop context.
 - **Conflict means no mutation:** uncertainty suppresses augmentation.
@@ -60,10 +60,10 @@ The module diagnoses but never rewrites:
 
 | Surface | Validate | Optional augmentation | Authoritative owner |
 | --- | --- | --- | --- |
-| Product and Offer JSON-LD | Yes | Missing-only | Theme, existing SEO module, or `llmscatalog` when explicitly enabled |
+| Product and Offer JSON-LD / Microdata | Yes | Missing Offer fields; Microdata is supplemented with JSON-LD | Theme, existing SEO module, or `llmscatalog` when explicitly enabled |
 | Organization JSON-LD | Yes | Missing-only | Merchant/theme, or `llmscatalog` when explicitly enabled |
 | Breadcrumb JSON-LD | Yes | Missing-only | Theme, or `llmscatalog` when explicitly enabled |
-| Product variants/ProductGroup | Readiness audit | No in v1 | Theme or specialist integration |
+| Product variant prices | Yes | AggregateOffer range for bounded combination sets | Theme or `llmscatalog` when explicitly enabled |
 | Merchant Center feed | Optional snapshot comparison | No | Merchant Center integration/feed provider |
 | XML and image sitemaps | Yes | No | PrestaShop/core or sitemap module |
 | `robots.txt` | Yes | No | Merchant/server/hosting configuration |
@@ -122,7 +122,7 @@ Proposed services:
 
 Augmentation uses PrestaShop’s `actionOutputHTMLBefore` hook because it receives the complete rendered front-office HTML by reference. This allows the module to inspect JSON-LD emitted by earlier theme and module rendering before deciding whether insertion is safe. [PrestaShop hook documentation](https://devdocs.prestashop-project.org/9/modules/concepts/hooks/list-of-hooks/actionoutputhtmlbefore/)
 
-The augmenter inserts one JSON-LD script immediately before `</head>`. If the document lacks a usable head, parsing fails, or a relevant conflict exists, it leaves the response unchanged.
+For a missing Product entity, the augmenter inserts one JSON-LD script immediately before `</head>`. For a unique canonical JSON-LD Product, it fills absent Offer properties in the existing script while preserving its other data. Incomplete Microdata is retained and supplemented with a canonical Product JSON-LD node. If the document lacks a usable head, parsing fails, or a relevant conflict exists, it leaves the response unchanged.
 
 ## 6. Audit execution model
 
@@ -205,6 +205,10 @@ JSON-LD inspection must support:
 - linked entities referenced through `@id`;
 - multiple JSON-LD script elements.
 
+Product Microdata inspection must recognize Product/ProductGroup item scopes,
+nested Offer/AggregateOffer scopes, and their public price, currency, and
+availability values.
+
 Validation has two levels:
 
 1. Schema.org shape and internal consistency.
@@ -232,24 +236,18 @@ Audit purchasable product pages for:
 
 Structured data, landing-page data, and Merchant Center data should agree, especially for price, currency, condition, and availability. Structured data complements Merchant Center feeds but does not replace regular feed updates. [Merchant Center structured-data guidance](https://support.google.com/merchants/answer/6069143)
 
-#### Missing-only Product/Offer augmentation
+#### Product/Offer augmentation
 
-V1 augmentation is allowed only when:
+Product augmentation is allowed only when:
 
-- Product and ProductGroup are both absent;
-- all JSON-LD blocks are parseable;
-- the page is a public product page;
-- the canonical URL points to the inspected product;
-- the product is active and publicly visible;
-- price, currency, availability, name, URL, and at least one image are available;
-- no conflicting SEO module is configured as owner;
-- Product augmentation is enabled for the current shop.
+- the page is a public, canonical product page and its rendered JSON-LD is parseable;
+- the product is active and publicly visible, with a public price and currency;
+- the target Product entity is unique and can be associated with the canonical URL;
+- the augmentation switch is enabled for the current shop.
 
-If any Product-like entity already exists, the module reports its issues but emits nothing.
+When there is no Product entity, emit Product JSON-LD with an Offer. When one JSON-LD Product entity exists, fill only missing Offer fields. When incomplete Product Microdata exists, retain it and supplement it with a complete JSON-LD Product node. Existing populated values are never overwritten; conflicting or ambiguous markup is reported and left unchanged.
 
-For simple products, emit Product with one Offer.
-
-Products with combinations are diagnostics-only in v1 unless the page exposes one unambiguous purchasable product with a single public price and URL. The module does not synthesize ProductGroup or variant URLs. Google’s variant requirements include unique variant IDs, variant selection through distinct URLs, and self-contained markup, making broad automatic augmentation unsafe. [Google product-variant guidance](https://developers.google.com/search/docs/appearance/structured-data/product-variants)
+For products with combinations, emit AggregateOffer low/high prices across the complete active shop combination set, with one public currency and aggregate availability. Use the configured variant limit; if the full set exceeds the limit or any price calculation fails, omit the range rather than publish a partial one. The module does not synthesize separate variant URLs or ProductGroup markup. [Google product-variant guidance](https://developers.google.com/search/docs/appearance/structured-data/product-variants)
 
 Review and rating markup is never synthesized.
 
@@ -539,7 +537,7 @@ Customer-group, personalized, location-dependent, tax-exempt, or negotiated pric
 
 The current admin experience is one Symfony configuration page. It contains the publishing and rich-product settings, per-shop augmentation switches, the audit controls, JSON report download, and one-time XML/TSV feed snapshot comparison. The audit is scoped to the current shop and language and displays the returned report as JSON. It samples the homepage, up to 10 categories, and up to 25 products. Audit work runs in batches of at most five, can be canceled between requests, and report/session state expires after 15 minutes.
 
-When saving augmentation settings, the controller requires a completed audit for the current shop and language, no blocker findings, and explicit confirmation that the proposed augmentation preview was reviewed. The page does not currently render a structured interactive preview; the confirmation is a required acknowledgement associated with the audit report and the deterministic missing-only runtime behavior.
+When saving augmentation settings, the controller requires a completed audit for the current shop and language, no blocker findings, and explicit confirmation that the proposed augmentation preview was reviewed. The page does not currently render a structured interactive preview; the confirmation is a required acknowledgement associated with the audit report and deterministic conflict-checked runtime behavior.
 
 The page does not provide persistent audit history, configurable audit sections, dashboard metrics, visual entity inspectors, copyable crawler policy controls, external measurement integrations, or analytics ingestion.
 
@@ -553,19 +551,20 @@ All augmentation switches default to off and are shop-scoped:
 
 - Organization;
 - Breadcrumb;
-- Product/Offer for eligible simple products.
+- Product/Offer for eligible products, with AggregateOffer for bounded variant sets.
 
 Enabling a switch requires:
 
 1. a completed audit;
 2. no unresolved blocker for that surface;
 3. acknowledgement that the current audit and proposed augmentation preview were reviewed;
-4. a warning that the module will stand down whenever another implementation appears.
+4. a warning that Product augmentation fills only missing fields on one canonical entity and stands down on conflicting or ambiguous markup.
 
 At runtime, augmentation is suppressed when:
 
 - any JSON-LD block is malformed;
-- the relevant type already exists;
+- a complete Product offer already exists, or a conflicting Product value would need replacement;
+- an Organization or BreadcrumbList entity already exists;
 - page type or entity identity is ambiguous;
 - required source fields are missing;
 - canonical or indexability checks fail;
@@ -691,10 +690,12 @@ Cover:
 
 - installation and hook registration;
 - `actionOutputHTMLBefore` mutation by reference;
-- existing theme JSON-LD causes augmentation to stand down;
+- existing complete theme Product markup causes augmentation to stand down;
+- partial canonical Product JSON-LD receives only missing Offer properties;
+- incomplete Product Microdata receives a complete supplemental JSON-LD Product entity;
 - malformed existing JSON-LD causes augmentation to stand down;
-- simple product injection;
-- combination product suppression;
+- simple Product/Offer injection;
+- combination AggregateOffer ranges, stock aggregation, and configured bounds;
 - sale, stock, currency, tax, and inactive-product cases;
 - homepage Organization behavior;
 - category and product breadcrumbs;
@@ -765,9 +766,9 @@ On a representative catalog:
 
 ### Phase 3 — Product/Offer pilot
 
-- Enable only for eligible simple products.
-- Compare price, currency, availability, canonical URL, and images with the rendered page and optional feed.
-- Do not enable on combination products until a separate ProductGroup design is approved.
+- Enable on a staging shop for simple and combination products.
+- Compare public price, currency, availability, canonical URL, and variant range with the rendered page and optional feed.
+- Verify over-limit and conflicting markup remains unchanged and receives an audit finding.
 
 ### Phase 4 — general availability
 
@@ -783,7 +784,8 @@ For the implemented foundation and current single-page interface, acceptance req
 - audits are shop- and language-isolated;
 - public catalog checks use an anonymous public context;
 - Product/Offer, Organization, and Breadcrumb JSON-LD are parsed and validated;
-- existing relevant JSON-LD always prevents augmentation;
+- complete existing product markup prevents duplicate augmentation, while unambiguous missing Offer fields can be filled;
+- Organization and Breadcrumb JSON-LD remain missing-only;
 - malformed or ambiguous pages are never mutated;
 - augmentation is disabled by default and reversible through configuration;
 - robots, sitemaps, canonicals, `hreflang`, feeds, and editorial content remain read-only;
@@ -816,7 +818,7 @@ V1 does not:
 - synthesize reviews, ratings, return policies, shipping policies, or loyalty programs;
 - create product descriptions, buying guides, comparison pages, or FAQs;
 - emit FAQPage markup;
-- rewrite existing JSON-LD;
+- replace or wholesale rewrite existing JSON-LD; only the bounded Product Offer merge described above is allowed;
 - crawl arbitrary external sites;
 - persist historical analytics or audit data;
 - inspect private, group-specific, personalized, or logged-in prices;

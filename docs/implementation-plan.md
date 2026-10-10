@@ -1,19 +1,20 @@
 # Implementation plan
 
-## GEO remediation 09 integration note
+## GEO remediation 09 integration update
 
-The 1.3.0 integration adds audit value objects, bounded audit batches,
-JSON-LD parsing and missing-only conflict checks, rendered canonical/
+The 1.3.0 foundation adds audit value objects, bounded audit batches,
+JSON-LD and Microdata parsing, product Offer completeness checks, rendered canonical/
 hreflang/image/content inspection, robots and sitemap diagnostics, authorized
 host fetching, and independent opt-in Organization, Product, and Breadcrumb
 augmentation. Augmentation reads final HTML only,
-does no network work, and leaves malformed or already-owned JSON-LD untouched.
+does no network work, and leaves malformed, conflicting, or ambiguous markup untouched.
 The admin workflow supports bounded batches, cancellation between batches,
-short-lived JSON reports, and one-time XML/TSV feed snapshots. Product and
-Breadcrumb augmentation is limited to unambiguous public simple products and
-active default-category ancestry. Unit artifacts cover parsers, conflicts,
-opt-in, batch limits, and URL authorization; no test or verification command
-was executed. See
+short-lived JSON reports, and one-time XML/TSV feed snapshots. Product
+augmentation fills missing Offer fields for one canonical Product and
+supports complete AggregateOffer ranges for bounded variant sets. Organization
+and Breadcrumb augmentation remains missing-only. The 1.4.0 update adds
+Microdata inspection, Product Offer findings, and variant price/availability
+aggregation. See
 [specification 09](specs/09-ecommerce-geo-foundations.md).
 
 ## GEO remediation 08 implementation note

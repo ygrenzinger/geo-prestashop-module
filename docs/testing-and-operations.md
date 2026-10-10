@@ -19,7 +19,7 @@ scripts/run-integration-tests.sh --testsuite unit
 
 To run against an existing shop instead, point `PS_TEST_SHOP_ROOT` at the shop root (the directory containing `config/config.inc.php`) and run `vendor/bin/phpunit -c phpunit.xml.dist`; `tests/bootstrap.php` loads it. Without a shop, the integration tests self-skip.
 
-PHP lint and the standalone unit suite passed locally for this change. Runtime acceptance requires a clean PrestaShop 9.0.2 and supported 9.1.x shop matrix, including install/upgrade, multistore and locale isolation, public visitor-state parity, route/hook behavior, cache invalidation and validators, audit security/cancellation, JSON-LD conflict behavior, and representative large-catalog query/memory checks. Record actual command and shop results before calling acceptance complete.
+For this change, `composer lint` and `composer test` passed locally (95 tests; 6 shop-dependent skips). `scripts/run-integration-tests.sh` passed in the Docker PrestaShop 9.2.0 shop (95 tests; 10,733 assertions). These checks cover the local shop only; runtime acceptance still requires the supported 9.0.2 and 9.1.x install/upgrade, multistore, locale, public visitor-state, cache, audit security/cancellation, and large-catalog checks.
 
 For package validation, verify ZIP integrity, `llmscatalog/` archive root, absence of `.DS_Store`, expected current files, and source/archive byte parity. A successful ZIP check validates packaging only.
 
@@ -36,7 +36,7 @@ Local smoke check on the mounted PrestaShop 9.2.0 test shop: `/index.php` return
 
 ## Install and upgrade
 
-Install the preserved `llmscatalog/` wrapper under `modules/`, install through Module Manager, and clear PrestaShop/Symfony route caches if needed. Source version is 1.3.2 and minimum PrestaShop is 9.0.2. Upgrade scripts add missing settings and schema idempotently while preserving stored values. Confirm installed version history before downgrade. Uninstall removes module settings and disposable cache/revision tables.
+Install the preserved `llmscatalog/` wrapper under `modules/`, install through Module Manager, and clear PrestaShop/Symfony route caches if needed. Source version is 1.4.0 and minimum PrestaShop is 9.0.2. Upgrade scripts add missing settings and schema idempotently while preserving stored values. Confirm installed version history before downgrade. Uninstall removes module settings and disposable cache/revision tables.
 
 ## Operations
 
@@ -52,4 +52,4 @@ Disable rich product Markdown or any augmentation switch in configuration to ret
 
 ## Package and acceptance status
 
-`outputs/llmscatalog.zip` is rebuilt from current source and validated for archive integrity, root structure, `.DS_Store` exclusion, and source/archive parity. Local PHP lint, standalone PHPUnit, Docker integration tests, and the `/index.php` response smoke check passed for the homepage negotiation change; full PrestaShop runtime validation remains pending; see the [remediation status matrix](specs/00-geo-remediation-master-plan.md).
+`outputs/llmscatalog.zip` is rebuilt from current source and validated for archive integrity, root structure, `.DS_Store` exclusion, and source/archive parity. For product Offer completion, PHP lint, host PHPUnit, and the Docker PrestaShop 9.2.0 suite passed; full supported-version and multistore runtime validation remains pending. See the [remediation status matrix](specs/00-geo-remediation-master-plan.md).

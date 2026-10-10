@@ -1,6 +1,6 @@
 # LLMs.txt for PrestaShop
 
-`llmscatalog` is a dependency-free PrestaShop 9 module (minimum 9.0.2) that publishes localized catalog indexes and product Markdown, with optional complete catalog traversal, a read-only GEO audit, and opt-in missing-only JSON-LD augmentation. It helps make public catalog information easier for crawlers and generative systems to interpret; it does not promise crawling, ranking, citation, or inclusion.
+`llmscatalog` is a dependency-free PrestaShop 9 module (minimum 9.0.2) that publishes localized catalog indexes and product Markdown, with optional complete catalog traversal, a read-only GEO audit, and opt-in structured-data augmentation. Product audits check JSON-LD and Microdata for public Offer price data; eligible pages can receive a Product/Offer or bounded variant AggregateOffer. It helps make public catalog information easier for crawlers and generative systems to interpret; it does not promise crawling, ranking, citation, or inclusion.
 
 ## Features
 

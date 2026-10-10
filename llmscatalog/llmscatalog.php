@@ -28,7 +28,7 @@ class LlmsCatalog extends Module
     {
         $this->name = 'llmscatalog';
         $this->tab = 'seo';
-        $this->version = '1.3.2';
+        $this->version = '1.4.0';
         $this->author = 'LLMs.txt for PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;

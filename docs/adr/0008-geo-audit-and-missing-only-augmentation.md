@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted for the 1.3.0 implementation; runtime acceptance is pending.
+Accepted for the 1.3.0 implementation; Product Offer behavior is superseded by
+[ADR 0009](0009-product-offer-completion.md). Runtime acceptance is pending.
 
 ## Decision
 

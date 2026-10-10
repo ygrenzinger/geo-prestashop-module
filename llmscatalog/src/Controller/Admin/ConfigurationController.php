@@ -73,10 +73,17 @@ class ConfigurationController extends PrestaShopAdminController
             'help' => 'Opt-in per shop. Existing or malformed JSON-LD is left unchanged.',
             'data' => (bool) Configuration::get('LLMSCATALOG_AUGMENT_ORGANIZATION', null, $groupId, $shopId),
         ]);
-        foreach (['PRODUCT'=>'augment_product','BREADCRUMB'=>'augment_breadcrumb'] as $suffix=>$field) $builder->add($field, CheckboxType::class, [
-            'required'=>false,'label'=>'Add missing '.$suffix.' JSON-LD only when no compatible entity exists (experimental)',
+        $builder->add('augment_product', CheckboxType::class, [
+            'required'=>false,
+            'label'=>'Complete missing Product Offer data on canonical pages (experimental)',
+            'help'=>'Opt-in per shop. Missing Offer fields are completed only on one canonical product entity; conflicting, malformed, and ambiguous markup is left unchanged.',
+            'data'=>(bool)Configuration::get('LLMSCATALOG_AUGMENT_PRODUCT',null,$groupId,$shopId),
+        ]);
+        $builder->add('augment_breadcrumb', CheckboxType::class, [
+            'required'=>false,
+            'label'=>'Add Breadcrumb JSON-LD only when no compatible entity exists (experimental)',
             'help'=>'Opt-in per shop. Existing or malformed JSON-LD and ambiguous pages are never modified.',
-            'data'=>(bool)Configuration::get('LLMSCATALOG_AUGMENT_'.$suffix,null,$groupId,$shopId),
+            'data'=>(bool)Configuration::get('LLMSCATALOG_AUGMENT_BREADCRUMB',null,$groupId,$shopId),
         ]);
         $builder->add('augmentation_preview_confirmed', CheckboxType::class, ['required'=>false,'mapped'=>false,'label'=>'I reviewed the current audit report and proposed augmentation preview']);
 

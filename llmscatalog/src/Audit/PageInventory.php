@@ -6,12 +6,26 @@ final class PageInventory
 {
     public function collect(\Context $context,int $languageId): array
     {
+        return $this->collectDetailed($context, $languageId)['urls'];
+    }
+
+    /** Keeps the product sample explicit so rendered audits can apply product rules only there. */
+    public function collectDetailed(\Context $context,int $languageId): array
+    {
         $urls=[$context->link->getPageLink('index',true,null,null,false,(int)$context->shop->id)];
+        $productUrls=[];
         $shopId=(int)$context->shop->id;
         $rows=\Db::getInstance()->executeS('SELECT c.id_category FROM `'._DB_PREFIX_.'category` c INNER JOIN `'._DB_PREFIX_.'category_shop` cs ON cs.id_category=c.id_category AND cs.id_shop='.(int)$shopId.' WHERE c.active=1 ORDER BY c.level_depth ASC,c.position ASC,c.id_category ASC LIMIT 10');
         foreach((array)$rows as $row){$id=(int)($row['id_category']??0);if($id<1)continue;$category=new \Category($id,$languageId,$shopId);if(\Validate::isLoadedObject($category)&&$category->active)$urls[]=$context->link->getCategoryLink($category);}
         $repo=new \LlmsCatalog\Service\CatalogRepository($context);$builder=new \LlmsCatalog\Service\UrlBuilder($context);
-        foreach($repo->products($languageId,25) as $product)$urls[]=$builder->productHtmlUrl((int)$product['id_product'],(string)$product['link_rewrite'],$languageId);
-        return array_slice(array_values(array_unique($urls)),0,36);
+        $productUrlsById=[];
+        foreach($repo->products($languageId,25) as $product){$id=(int)$product['id_product'];$url=$builder->productHtmlUrl($id,(string)$product['link_rewrite'],$languageId);$urls[]=$url;$productUrls[]=$url;$productUrlsById[$id]=$url;}
+        $urls=array_slice(array_values(array_unique($urls)),0,36);
+        $productIds=array_keys($productUrlsById);$variantUrls=[];
+        if($productIds){
+            $counts=\Db::getInstance()->executeS('SELECT pa.id_product,COUNT(*) AS variants FROM `'._DB_PREFIX_.'product_attribute` pa INNER JOIN `'._DB_PREFIX_.'product_attribute_shop` pas ON pas.id_product_attribute=pa.id_product_attribute AND pas.id_shop='.(int)$shopId.' WHERE pa.id_product IN ('.implode(',',array_map('intval',$productIds)).') GROUP BY pa.id_product');
+            foreach((array)$counts as $row){$url=$productUrlsById[(int)($row['id_product']??0)]??null;if($url!==null&&(int)($row['variants']??0)>0)$variantUrls[]=$url;}
+        }
+        return ['urls'=>$urls,'product_urls'=>array_values(array_intersect($productUrls,$urls)),'variant_urls'=>array_values(array_intersect($variantUrls,$urls))];
     }
 }

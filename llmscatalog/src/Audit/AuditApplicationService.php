@@ -23,9 +23,10 @@ final class AuditApplicationService
         }
 
         $state = $action === 'start' ? AuditSession::emptyState() : AuditSession::read($session, $key);
-        $urls = $this->inventory->collect($context, $languageId);
+        $inventory = $this->inventory->collectDetailed($context, $languageId);
+        $urls = $inventory['urls'];
         $host = (string) parse_url($urls[0] ?? '', PHP_URL_HOST);
-        $report = $this->runner->runRenderedBatch($urls, [$host], $shopId, $locale, (int) ($state['offset'] ?? 0));
+        $report = $this->runner->runRenderedBatch($urls, [$host], $shopId, $locale, (int) ($state['offset'] ?? 0), false, $inventory['product_urls'], $inventory['variant_urls']);
 
         $state['findings'] = array_merge(
             $state['findings'] ?? [],
