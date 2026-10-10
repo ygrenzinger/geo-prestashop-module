@@ -1,0 +1,25 @@
+tests/Unit/StructuredDataAugmenterTest.php
+  s_f039e2ded9d6ba::t_cc8244afab9e61 18-34
+tests/Unit/OrganizationDescriptionResolverTest.php
+  s_f039e2ded9d6ba::t_8991036144821e 1-28
+llmscatalog/src/Service/OrganizationDescriptionResolver.php
+  s_f039e2ded9d6ba::t_1ce64a7f15ea79 1-17
+llmscatalog/src/Service/StructuredDataPageAugmentationService.php
+  s_f039e2ded9d6ba::t_ebe869a379febd 100-101,107-112,119-123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d59a829560332a08086c01c51cbe2306d39b724e",
+  "prompts": {},
+  "sessions": {
+    "s_f039e2ded9d6ba": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1244d-b783-73b2-b068-3b76de7694f7",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    }
+  }
+}
