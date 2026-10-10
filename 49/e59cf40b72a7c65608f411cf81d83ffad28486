@@ -1,0 +1,104 @@
+llmscatalog/src/Service/AggregateOfferBuilder.php
+  s_7aaf184b9ff213::t_ac2f31261ce46f 1-29
+tests/Unit/ProductOfferAuditorTest.php
+  s_7aaf184b9ff213::t_e33b14c612f4d6 3,44-50
+  s_7aaf184b9ff213::t_79fc8777bb7988 38-43,51
+  s_7aaf184b9ff213::t_f6f8f33d57b9bf 1-2,4-37,52
+llmscatalog/config.xml
+  s_7aaf184b9ff213::t_1e41a5290b0e86 5
+docs/specs/00-geo-remediation-master-plan.md
+  s_7aaf184b9ff213::t_2477870a84e251 4
+  s_7aaf184b9ff213::t_463f083400b106 71,73
+  s_7aaf184b9ff213::t_b33f5ca4a025df 21,55,57,95
+llmscatalog/src/Audit/PageInventory.php
+  s_7aaf184b9ff213::t_62c498c5b6eb65 9-13,16,23
+  s_7aaf184b9ff213::t_ec91a73984e5ea 21-22,24-29
+  s_7aaf184b9ff213::t_5e72ed5f82e5d1 8
+tests/Unit/AggregateOfferBuilderTest.php
+  s_7aaf184b9ff213::t_919b318c4a020f 1-34
+docs/architecture.md
+  s_7aaf184b9ff213::t_aa07ca30fb1382 109,112-118,121-126
+llmscatalog/src/Audit/StructuredDataInspector.php
+  s_7aaf184b9ff213::t_291cd80797eedc 77
+  s_7aaf184b9ff213::t_c9b006f07a4043 4,9,13,18,21-33,36-76,78-93,101-110,114
+README.md
+  s_7aaf184b9ff213::t_f066345f07c5a7 3
+llmscatalog/src/Controller/Admin/ConfigurationController.php
+  s_7aaf184b9ff213::t_0e7d115cd0f067 76-84,86
+docs/adr/0008-geo-audit-and-missing-only-augmentation.md
+  s_7aaf184b9ff213::t_52b0ec19338983 5-6
+docs/implementation-plan.md
+  s_7aaf184b9ff213::t_58adb4f29a5548 3,5,15-17
+  s_7aaf184b9ff213::t_0cdf2528a3a3a0 6,10,12-14
+llmscatalog/src/Service/StructuredDataPageAugmentationService.php
+  s_7aaf184b9ff213::t_3874ca54614554 212
+  s_7aaf184b9ff213::t_94287fd1455161 203,213,220
+  s_7aaf184b9ff213::t_dcd1398f6ab407 79,137-145,158,182-202,204-211,214-219,221-226
+  s_7aaf184b9ff213::t_877912e47c13c4 136,160
+  s_7aaf184b9ff213::t_59b5bc595a8d64 227
+llmscatalog/src/Audit/AuditRunner.php
+  s_7aaf184b9ff213::t_57a2835905b213 24,38
+  s_7aaf184b9ff213::t_e5ed5350005642 9,29,31-33,36-37
+docs/specs/09-ecommerce-geo-foundations.md
+  s_7aaf184b9ff213::t_38712cdb69c687 821
+  s_7aaf184b9ff213::t_2477870a84e251 3-4
+  s_7aaf184b9ff213::t_f6be49f9eb4d12 5,12,33-34,49,63,66
+  s_7aaf184b9ff213::t_0cbde17e3bde64 239,241,243-246,248,250,693-695,697-698,769-771,787-788
+  s_7aaf184b9ff213::t_871c6b05932b65 125,208-210
+  s_7aaf184b9ff213::t_3b65cbed4bdf56 540
+  s_7aaf184b9ff213::t_a6175cae4259dc 554,561,566-567
+  s_7aaf184b9ff213::t_2c07034ceaaf05 211
+llmscatalog/llmscatalog.php
+  s_7aaf184b9ff213::t_1b7081644f78de 31
+docs/adr/0009-product-offer-completion.md
+  s_7aaf184b9ff213::t_3e01d9e2b3b72a 1-43
+llmscatalog/src/Service/StructuredDataAugmenter.php
+  s_7aaf184b9ff213::t_0a47a435a66a82 200,215,312
+  s_7aaf184b9ff213::t_2597889de9bd26 186
+  s_7aaf184b9ff213::t_d8c2cd69d12370 205-209,213,232-239,243,245,291
+  s_7aaf184b9ff213::t_5feb9119254ac6 217-220
+  s_7aaf184b9ff213::t_aae6933727a96e 25-26,151-153,170,179,254-261,272-282,284-285,288
+  s_7aaf184b9ff213::t_c2a588c3532324 155,160-167
+  s_7aaf184b9ff213::t_033758dcba965b 262-271
+  s_7aaf184b9ff213::t_a0a8519e68b562 10-24,27-34,117-150,154,156-159,168-169,193-199,201-204,210-212,214,216,221-231,240-242,244,246-253,283,286-287,289-290,292-311,313-316
+  s_7aaf184b9ff213::t_082fc589ccb4e1 171-178,180-185,187-192
+llmscatalog/src/Service/AvailabilityProvider.php
+  s_7aaf184b9ff213::t_f5fb83a43bc16d 64-84
+llmscatalog/src/Audit/AuditApplicationService.php
+  s_7aaf184b9ff213::t_2a388bbf0d65ce 26-27
+  s_7aaf184b9ff213::t_af4e0ed031b98b 29
+tests/Unit/StructuredDataAugmenterTest.php
+  s_7aaf184b9ff213::t_3f8b98d0445724 40-59,62-69,83-87
+  s_7aaf184b9ff213::t_f59e5acbdf77ee 70-82
+  s_7aaf184b9ff213::t_bc6b0f1dcfd0d7 60-61
+docs/testing-and-operations.md
+  s_7aaf184b9ff213::t_7b4a120ddae742 39
+  s_7aaf184b9ff213::t_463f083400b106 55
+  s_7aaf184b9ff213::t_3dfeddb77ea3b9 22
+llmscatalog/src/Audit/ProductOfferAuditor.php
+  s_7aaf184b9ff213::t_647e774185cd43 25-26,111
+  s_7aaf184b9ff213::t_b0ca602758e070 1-6,8-11,13-16,18,21-24,27-52,54-60,63-73,86-110,112-118
+  s_7aaf184b9ff213::t_a8c73c9e15e42d 7,12,17,19-20,53,62,74-85
+  s_7aaf184b9ff213::t_34bc48520020b6 61
+tests/Unit/StructuredDataInspectorTest.php
+  s_7aaf184b9ff213::t_97cd7316c72f28 18-35
+docs/user-guide.md
+  s_7aaf184b9ff213::t_a3dfaca3938ea9 65
+  s_7aaf184b9ff213::t_128bcef6f79761 10,33,79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "49e59cf40b72a7c65608f411cf81d83ffad28486",
+  "prompts": {},
+  "sessions": {
+    "s_7aaf184b9ff213": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a12463-2fcf-7890-8d00-cf8ca0c081a1",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    }
+  }
+}
