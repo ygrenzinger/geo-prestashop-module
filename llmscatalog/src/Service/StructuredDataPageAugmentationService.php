@@ -97,19 +97,30 @@ final class StructuredDataPageAugmentationService
     {
         $languageId = (int) ($context->language->id ?? 0);
         $name = trim((string) Configuration::get('PS_SHOP_NAME', $languageId, $groupId, $shopId));
-        $baseUrl = rtrim((new UrlBuilder($context))->baseLink(), '/') . '/';
+        $urls = new UrlBuilder($context);
+        $baseUrl = rtrim($urls->baseLink(), '/') . '/';
         if ($name === '' || !filter_var($baseUrl, FILTER_VALIDATE_URL)
             || strtolower((string) parse_url($baseUrl, PHP_URL_SCHEME)) !== 'https') {
             return null;
         }
 
-        return [
+        $description = (new OrganizationDescriptionResolver())->resolve(
+            (string) Configuration::get('PS_META_DESCRIPTION', $languageId, $groupId, $shopId),
+            (string) Configuration::get('PS_META_DESCRIPTION', $urls->defaultLanguageId(), $groupId, $shopId)
+        );
+
+        $candidate = [
             '@context' => 'https://schema.org',
             '@type' => 'Organization',
             '@id' => rtrim($baseUrl, '/') . '#organization',
             'name' => $name,
             'url' => $baseUrl,
         ];
+        if ($description !== null) {
+            $candidate['description'] = $description;
+        }
+
+        return $candidate;
     }
 
     private function productCandidate(Context $context, int $productId, array $product, array $details, int $languageId): ?array
