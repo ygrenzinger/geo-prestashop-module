@@ -2,7 +2,7 @@
 <module>
     <name>llmscatalog</name>
     <displayName><![CDATA[LLMs.txt for PrestaShop]]></displayName>
-    <version><![CDATA[1.4.0]]></version>
+    <version><![CDATA[1.5.0]]></version>
     <description><![CDATA[Publishes a localized, machine-readable catalog index for generative engines.]]></description>
     <author><![CDATA[LLMs.txt for PrestaShop]]></author>
     <tab><![CDATA[seo]]></tab>

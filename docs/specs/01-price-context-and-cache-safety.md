@@ -1,12 +1,12 @@
 # Price context and public-cache safety
 
-Status: Implemented; runtime validation pending  
+Status: Implemented; current host and Docker PrestaShop 9.2.0 suites pass; supported-version acceptance remains pending.
 Target module release: `1.1.0`  
 Supported baseline: PrestaShop `9.0.2`
 
-Implementation status: Code and unit-test artifacts are present in this
-workspace. Runtime validation is pending PHP-enabled CI and PrestaShop test
-shops; the acceptance criteria below are not yet declared complete.
+Current validation results are maintained in the [status matrix](00-geo-remediation-master-plan.md).
+The acceptance criteria below remain subject to the supported-version price,
+visitor-state, and cache validation matrix.
 
 ## 1. Objective
 

@@ -2,10 +2,7 @@
 
 ## Status
 
-Implemented in the approved module version `1.2.0` (folded into the consolidated `1.3.0` candidate); unit and runtime validation have not
-been run. PHP-enabled CI and PrestaShop 9.0.2/9.1.x test-shop gates remain
-pending, including query-plan and query-count measurements on a 10,000-product
-fixture.
+Implemented in the approved module version `1.2.0` (folded into the consolidated `1.3.0` candidate). The current host and Docker PrestaShop 9.2.0 suite results are recorded in the [status matrix](00-geo-remediation-master-plan.md). Supported-version shop gates and query-plan, query-count, memory, and response-size measurements on a 10,000-product fixture remain pending.
 
 ## Objective
 
@@ -542,6 +539,7 @@ Rollback consists of disabling complete indexes, clearing module caches, and
 returning the root to legacy rendering. Existing product Markdown URLs remain
 unaffected.
 
-Because the current workspace has no PHP, Composer, or PrestaShop runtime,
-implementation cannot be considered validated until these checks run in CI or
-a real PrestaShop 9 test shop.
+The current host and Docker PrestaShop 9.2.0 suite results are recorded in the
+[status matrix](00-geo-remediation-master-plan.md). Those runs do not cover the
+10,000-product query, memory, and response-size checks described here; those
+checks remain required before large-catalog acceptance is complete.

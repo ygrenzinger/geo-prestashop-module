@@ -1,5 +1,7 @@
 # Implementation plan
 
+The notes below record implementation scope across releases. Historical statements that tests had not yet run describe the status at that time; current cumulative validation is maintained in the [remediation status matrix](specs/00-geo-remediation-master-plan.md).
+
 ## GEO remediation 09 integration update
 
 The 1.3.0 foundation adds audit value objects, bounded audit batches,
@@ -24,8 +26,8 @@ cursor endpoints, compact rows, root coverage counts, featured-category
 settings, byte-budgeted index pages, and a configuration-preserving consolidated 1.3.0
 upgrade have been added. Complete-index pages use ID cursors and avoid price
 and stock hydration; the effective featured-product limit is 250 while the
-saved value is preserved. Unit tests were added but deliberately not run.
-Runtime validation is pending PHP CI and a PrestaShop 9 test shop. See
+saved value is preserved. Current suite results and the remaining 10,000-product
+acceptance gate are recorded in the status matrix. See
 [specification 08](specs/08-large-catalog-completeness.md).
 
 ## GEO remediation 04 implementation note
@@ -34,8 +36,8 @@ Canonical routes and duplicate prevention are implemented in `llmscatalog`
 version `1.1.0` through `1.3.0`: shop-scoped full-locale routing, legacy redirect resolution,
 public-product rewrite checks, query preservation, representation and locale
 Link relations, and the configuration-preserving cache invalidation upgrade
-step are present. Focused tests were added but deliberately not run. Runtime
-validation is pending PHP-enabled CI and a PrestaShop test shop; see
+step are present. Current suite results and remaining supported-version route,
+installation, and upgrade gates are recorded in the status matrix; see
 [specification 04](specs/04-canonical-routes-and-duplicates.md).
 
 ## GEO remediation 07 implementation note
@@ -44,18 +46,18 @@ Full localization is implemented in `llmscatalog` version `1.1.0`: active-shop
 full-locale routes and legacy ISO redirects, reviewed English and French
 catalogue dictionaries, explicit merchant-field fallback provenance and
 disclosure, requested-locale price formatting, global configuration migration,
-and localized administration are present. Tests were added but deliberately
-not run. Runtime and static validation remain pending in PHP-enabled CI and a
-PrestaShop test shop; see [specification 07](specs/07-full-localization.md).
+and localized administration are present. Current suite results and remaining
+locale and multistore gates are recorded in the status matrix; see
+[specification 07](specs/07-full-localization.md).
 
 ## GEO remediation 01 implementation note
 
 The price-context and cache-safety implementation is now represented in
 `llmscatalog` version `1.1.0`: canonical anonymous pricing services,
 persistent per-document cache entries, generation invalidation, and raw
-conditional HTTP responses are present. Runtime validation is pending and
-must pass in PHP-enabled CI and PrestaShop 9.0.2/9.1.x test shops before this
-change is complete. See [the remediation spec](specs/01-price-context-and-cache-safety.md)
+conditional HTTP responses are present. Current suite results and remaining
+PrestaShop 9.0.2/9.1.x price-context and cache gates are recorded in the status
+matrix. See [the remediation spec](specs/01-price-context-and-cache-safety.md)
 for the acceptance matrix and deployment gates.
 
 ## Goal
@@ -129,7 +131,8 @@ fingerprint. Product, category, stock, pricing, currency, group, tax, language,
 shop, and module-setting changes bump cache generation. Price-bearing documents
 are bounded by configured TTL and the next finite public-price transition; successful HTTP
 responses require browser revalidation and errors/degraded documents are
-`no-store`. Runtime validation remains pending.
+`no-store`. Current test results and remaining acceptance gates are recorded
+in the [status matrix](specs/00-geo-remediation-master-plan.md).
 
 ## Delivery sequence
 

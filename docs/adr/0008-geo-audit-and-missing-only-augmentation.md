@@ -3,7 +3,9 @@
 ## Status
 
 Accepted for the 1.3.0 implementation; Product Offer behavior is superseded by
-[ADR 0009](0009-product-offer-completion.md). Runtime acceptance is pending.
+[ADR 0009](0009-product-offer-completion.md), and Organization contact/address
+completion by [ADR 0010](0010-organization-contact-data-augmentation.md).
+Runtime acceptance is pending.
 
 ## Decision
 

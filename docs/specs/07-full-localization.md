@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented for module version `1.1.0`; PHP-enabled CI and test-shop validation pending.
+Implemented for module version `1.1.0`; current host and Docker PrestaShop 9.2.0 suites pass. Supported-version locale and multistore acceptance remains pending; see the [status matrix](00-geo-remediation-master-plan.md).
 
 Minimum supported PrestaShop version: `9.0.2`.
 

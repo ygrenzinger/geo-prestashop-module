@@ -1,7 +1,7 @@
 # llmscatalog GEO remediation master plan
 
-**Status:** Remediations 01–09 implemented locally; runtime acceptance pending PHP-enabled CI and PrestaShop test-shop gates
-**Target:** llmscatalog 1.1.0 through 1.4.0
+**Status:** Remediations 01–09 and Organization contact-data enrichment are implemented locally. Host and Docker suites passed for version 1.5.0; supported-version and broader runtime acceptance remain pending.
+**Target:** llmscatalog 1.1.0 through 1.5.0
 **Minimum PrestaShop version:** 9.0.2
 
 ## Purpose
@@ -18,7 +18,7 @@ The module remains deterministic and dependency-free at runtime. It does not pro
 - Canonical language segments use normalized full PrestaShop locales, such as `fr-FR`. Preserve unambiguous legacy ISO paths with permanent redirects; reject unknown, inactive, ambiguous, or shop-unassigned locales.
 - Availability describes the canonical/default offer, is shared across Markdown and storefront Product/Offer JSON-LD, and never publishes exact stock quantities.
 - Support a design target of 10,000 public products per shop, with deterministic complete traversal through bounded indexes.
-- Use one installed module with isolated publishing, audit, and optional structured-data augmentation responsibilities. The audit is read-only. Augmentation is opt-in and conflict-checked; Product fills missing Offer fields on one canonical entity, while Organization and Breadcrumb remain missing-only.
+- Use one installed module with isolated publishing, audit, and optional structured-data augmentation responsibilities. The audit is read-only. Augmentation is opt-in and conflict-checked; Product fills missing Offer fields on one canonical entity, Organization fills missing contact/address fields on one homepage-matched entity, and Breadcrumb remains missing-only.
 - Ship reviewed `en-US` and `fr-FR` module translations initially.
 
 ## Priority and dependency order
@@ -45,7 +45,7 @@ The module remains deterministic and dependency-free at runtime. It does not pro
 
 | Order | Specification | Outcome | Dependencies |
 | --- | --- | --- | --- |
-| 9 | [Ecommerce GEO foundations](09-ecommerce-geo-foundations.md) | Audit-first diagnostics with optional missing-only structured-data augmentation. | 1–8 for shared product and locale facts |
+| 9 | [Ecommerce GEO foundations](09-ecommerce-geo-foundations.md) | Audit-first diagnostics with conflict-checked structured-data augmentation; Organization fills missing contact/address fields on one matched entity, Breadcrumb remains missing-only, and Product fills missing Offer fields. | 1–8 for shared product and locale facts |
 
 ## Release grouping
 
@@ -54,23 +54,26 @@ The module remains deterministic and dependency-free at runtime. It does not pro
 - **1.3.0:** Nice-to-have specification 9 for the audit subsystem and optional augmentation.
 - **1.4.0:** Product offer completeness audit for JSON-LD/Microdata and bounded variant AggregateOffer augmentation.
 
-The source module declares version **1.4.0** (minimum PrestaShop **9.0.2**). Earlier local version labels are development history; cumulative current behavior is represented by source version 1.4.0. Do not downgrade an installation that has recorded a higher version without checking its deployment history. The archive is a regenerated source package; package integrity does not constitute runtime acceptance.
+- **1.4.1:** Documentation and release-process policy update; no storefront behavior change.
+- **1.5.0:** Organization contact-point and postal-address enrichment from PrestaShop shop settings.
+
+The source module declares version **1.5.0** (minimum PrestaShop **9.0.2**). Earlier local version labels are development history; cumulative current behavior is represented by source version 1.5.0. Do not downgrade an installation that has recorded a higher version without checking its deployment history. The archive is a regenerated source package; package integrity does not constitute runtime acceptance.
 
 ## Remediation and release status
 
 | Remediation | Source implementation | Focused tests | Runtime validation | Detail |
 |---|---|---|---|---|
-| 01 Price context and cache safety | Present in 1.3.0 source | Present; not run here | Pending PHP/PrestaShop CI and shop matrix | [Spec 01](01-price-context-and-cache-safety.md) |
-| 02 Product availability | Present in 1.3.0 source | Present; not run here | Pending PHP/PrestaShop CI and shop matrix | [Spec 02](02-accurate-product-availability.md) |
-| 03 Freshness and invalidation | Present in 1.3.0 source | Present; not run here | Pending PHP/PrestaShop CI and shop matrix | [Spec 03](03-freshness-and-invalidation.md) |
-| 04 Canonical routes | Present in 1.3.0 source | Present; not run here | Pending route/install/upgrade tests | [Spec 04](04-canonical-routes-and-duplicates.md) |
-| 05 Discovery | Present in 1.3.0 source | Present; not run here | Pending PHP/PrestaShop and theme checks | [Spec 05](05-llms-discovery.md) |
-| 06 Rich product Markdown | Present; off by default | Present; not run here | Pending PHP/PrestaShop and 10k-product checks | [Spec 06](06-rich-product-markdown.md), [guide](../rich-product-markdown.md) |
-| 07 Full localization | Present in 1.3.0 source | Present; not run here | Pending locale/multistore matrix | [Spec 07](07-full-localization.md) |
-| 08 Large catalog completeness | Present; enabled by new-install default | Present; not run here | Pending 10k-product performance and shop matrix | [Spec 08](08-large-catalog-completeness.md) |
+| 01 Price context and cache safety | Present in 1.3.0 source | Covered by passing current host and Docker suites | Pending supported-version, visitor-state, and cache matrix | [Spec 01](01-price-context-and-cache-safety.md) |
+| 02 Product availability | Present in 1.3.0 source | Covered by passing current host and Docker suites | Pending supported-version, stock, and catalog-mode matrix | [Spec 02](02-accurate-product-availability.md) |
+| 03 Freshness and invalidation | Present in 1.3.0 source | Covered by passing current host and Docker suites | Pending supported-version and multi-node cache matrix | [Spec 03](03-freshness-and-invalidation.md) |
+| 04 Canonical routes | Present in 1.3.0 source | Covered by passing current host and Docker suites | Pending supported-version route/install/upgrade matrix | [Spec 04](04-canonical-routes-and-duplicates.md) |
+| 05 Discovery | Present in 1.3.0 source | Covered by passing current host and Docker suites | Pending supported-version and theme checks | [Spec 05](05-llms-discovery.md) |
+| 06 Rich product Markdown | Present; off by default | Covered by passing current host and Docker suites | Pending supported-version and 10k-product checks | [Spec 06](06-rich-product-markdown.md), [guide](../rich-product-markdown.md) |
+| 07 Full localization | Present in 1.3.0 source | Covered by passing current host and Docker suites | Pending supported-version locale/multistore matrix | [Spec 07](07-full-localization.md) |
+| 08 Large catalog completeness | Present; enabled by new-install default | Covered by passing current host and Docker suites | Pending 10k-product performance and shop matrix | [Spec 08](08-large-catalog-completeness.md) |
 | 09 GEO audit and augmentation | Present; augmentation off by default | Present; host and Docker PHPUnit passed | Pending supported-version, security, hook, and theme checks | [Spec 09](09-ecommerce-geo-foundations.md) |
 
-The source archive at `outputs/llmscatalog.zip` is rebuilt from the current `llmscatalog/` directory and checked for integrity, expected archive root, excluded `.DS_Store`, and file parity. PHP lint, host PHPUnit, and the Docker PrestaShop 9.2.0 suite passed for the product Offer completion change. Supported-version install/upgrade and broader runtime acceptance remain pending. See [testing and operations](../testing-and-operations.md) for repeatable gates.
+For version 1.5.0 (2026-10-10), `composer lint` passed and `composer test` passed locally (106 tests; 10,735 assertions; 6 shop-dependent skips); the Docker PrestaShop 9.2.0 suite passed (106 tests; 10,761 assertions). The source archive at `outputs/llmscatalog.zip` is rebuilt from the current `llmscatalog/` directory and checked for integrity, expected archive root, excluded `.DS_Store`, and file parity. These checks do not complete supported-version install/upgrade or broader runtime acceptance. See [testing and operations](../testing-and-operations.md) for repeatable gates.
 
 ## Cross-spec implementation contract
 
@@ -92,10 +95,10 @@ For each implementation change set:
 4. Verify output does not vary with customer, cart, cookie, geolocation, or selected currency state.
 5. Verify canonical redirects, 404s, GET/HEAD behavior, response headers, caching, invalidation, and promotion boundaries.
 6. For catalog traversal, verify exact-once coverage and query budgets with 10,000 eligible products.
-7. For structured-data augmentation, verify Product fills only missing fields on an unambiguous canonical entity, conflicting/ambiguous markup is unchanged, and Organization/Breadcrumb remain missing-only.
+7. For structured-data augmentation, verify Product fills only missing fields on an unambiguous canonical entity, Organization fills only missing contact/address fields on one homepage-matched entity, Breadcrumb remains missing-only, and conflicting/ambiguous markup is unchanged.
 8. Validate the packaged module ZIP and perform a representative test-shop smoke test.
 
-The local workspace previously had no PHP, Composer, or PrestaShop runtime. Until those checks run in CI or a test shop, validation must be reported as static/document-only rather than runtime-complete.
+The current results cover the host suite and one Docker PrestaShop 9.2.0 shop. Report the supported-version, multistore, security, hook/theme, and 10,000-product gates as pending until those specific checks pass.
 
 ## Explicitly deferred
 

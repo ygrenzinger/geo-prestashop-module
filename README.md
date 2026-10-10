@@ -13,7 +13,7 @@
 
 Copy the `llmscatalog/` directory into PrestaShop `modules/`, install **LLMs.txt for PrestaShop** in Module Manager, then open its configuration page. If friendly routes were previously cached, clear PrestaShop/Symfony caches after installation. The ZIP at `outputs/llmscatalog.zip` preserves the required `llmscatalog/` archive root.
 
-The storefront homepage also negotiates Markdown: `Accept: text/markdown` returns the localized catalog as `text/markdown` with `Vary: Accept`, while `Accept: text/html` keeps the rendered HTML homepage. This applies to the shop homepage URL itself when the module is enabled.
+On a matched shop-homepage GET request, `Accept: text/markdown` returns the localized catalog as `text/markdown` with `Vary: Accept` and `Cache-Control: private, no-store`. HTML remains the response when Markdown is not explicitly preferred. Verify the deployed root and language-prefixed homepage URLs; the recorded smoke test has not confirmed those routes through the test container's redirect behavior.
 
 ## Documentation
 
@@ -21,6 +21,7 @@ The storefront homepage also negotiates Markdown: `Accept: text/markdown` return
 - [Implementation plan and endpoint matrix](docs/implementation-plan.md)
 - [Architecture](docs/architecture.md)
 - [Testing and operations](docs/testing-and-operations.md)
+- [Changelog](CHANGELOG.md)
 - [Rich product Markdown](docs/rich-product-markdown.md)
 - [Remediation status matrix](docs/specs/00-geo-remediation-master-plan.md)
 - [Detailed specifications](docs/specs/)
@@ -28,4 +29,4 @@ The storefront homepage also negotiates Markdown: `Accept: text/markdown` return
 
 ## Validation status
 
-Source implementation and focused test files are present, and the ZIP is a regenerated source archive. PHP lint and standalone unit tests passed locally for this change; full PrestaShop installation/upgrade, security, and runtime behavior remain to be validated; release acceptance remains pending PHP-enabled CI and a PrestaShop 9.0.2/supported 9.1.x test-shop matrix. See the [status matrix](docs/specs/00-geo-remediation-master-plan.md).
+For version 1.5.0, `composer lint` passed, `composer test` passed (106 tests, 10,735 assertions, 6 shop-dependent skips), and the Docker PrestaShop 9.2.0 suite passed (106 tests, 10,761 assertions). Supported-version installation and upgrade, multistore, security, theme-hook, and large-catalog acceptance remain pending. The homepage Markdown smoke test verified `/index.php`; the deployed root and language-prefixed homepage routes still need verification. See the [status matrix](docs/specs/00-geo-remediation-master-plan.md).

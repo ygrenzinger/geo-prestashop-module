@@ -69,8 +69,8 @@ class ConfigurationController extends PrestaShopAdminController
         $shopId = (int) ($shop->id ?? 0);
         $builder->add('augment_organization', CheckboxType::class, [
             'required' => false,
-            'label' => 'Add Organization JSON-LD only when no compatible entity exists (experimental)',
-            'help' => 'Opt-in per shop. Existing or malformed JSON-LD is left unchanged.',
+            'label' => 'Add or complete Organization contact details in JSON-LD (experimental)',
+            'help' => 'Opt-in per shop. Missing contact and address fields are filled only on one matching Organization entity; populated values and malformed or ambiguous markup are preserved.',
             'data' => (bool) Configuration::get('LLMSCATALOG_AUGMENT_ORGANIZATION', null, $groupId, $shopId),
         ]);
         $builder->add('augment_product', CheckboxType::class, [
@@ -85,7 +85,7 @@ class ConfigurationController extends PrestaShopAdminController
             'help'=>'Opt-in per shop. Existing or malformed JSON-LD and ambiguous pages are never modified.',
             'data'=>(bool)Configuration::get('LLMSCATALOG_AUGMENT_BREADCRUMB',null,$groupId,$shopId),
         ]);
-        $builder->add('augmentation_preview_confirmed', CheckboxType::class, ['required'=>false,'mapped'=>false,'label'=>'I reviewed the current audit report and proposed augmentation preview']);
+        $builder->add('augmentation_preview_confirmed', CheckboxType::class, ['required'=>false,'mapped'=>false,'label'=>'I reviewed the current audit report and understand the proposed augmentation']);
 
         $builder->add('rich_product', CheckboxType::class, ['required' => false, 'label' => 'Enable rich product Markdown (experimental)']);
         $builder->add('product_providers', TextType::class, ['required' => false, 'label' => 'Enabled product provider IDs (comma separated)']);
@@ -121,7 +121,7 @@ class ConfigurationController extends PrestaShopAdminController
                 }
             }
             if ($enabling && (!$audit || empty($audit['complete']) || $hasBlocker || !$form->get('augmentation_preview_confirmed')->getData())) {
-                $form->get('augmentation_preview_confirmed')->addError(new \Symfony\Component\Form\FormError('Complete an audit with no blocker findings and review the preview before enabling augmentation.'));
+                $form->get('augmentation_preview_confirmed')->addError(new \Symfony\Component\Form\FormError('Complete an audit with no blocker findings and review the report before enabling augmentation.'));
             } else {
                 $settings->saveFormData($form->getData());
                 Configuration::updateValue(

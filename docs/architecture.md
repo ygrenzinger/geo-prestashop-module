@@ -109,8 +109,10 @@ shapes, and `AuditSummary` owns severity totals. `AuditFinding` and
 entries and the sample at 36, and the HTML/robots/structured-data inspectors only read
 their inputs. Feed uploads remain limited to 2 MiB and report/session state
 expires after 15 minutes. `UrlGuard` accepts HTTPS URLs only for explicitly authorized
-hosts and rejects IP literals. Organization and BreadcrumbList augmentation
-remain missing-only. Product augmentation fills missing offer fields in one
+hosts and rejects IP literals. Organization augmentation adds contact and
+postal-address details from the current shop's contact settings, and fills
+missing fields on one homepage-matched Organization entity without replacing
+populated values. BreadcrumbList augmentation remains missing-only. Product augmentation fills missing offer fields in one
 canonical JSON-LD Product entity, or adds a complete Product JSON-LD node when
 existing Microdata is incomplete. Conflicts, malformed JSON-LD, oversized
 documents, ambiguous entities, or missing `<head>` leave the response
@@ -175,8 +177,10 @@ address, and unidentified visitor group; customer, cart, cookie, geolocation,
 and selected currency state are excluded. Merchant fields retain source
 language metadata and fallback is disclosed once when emitted.
 
-Remediation 07 code and translation dictionaries are present. Runtime and
-static validation remain pending in PHP-enabled CI and a PrestaShop test shop.
+Remediation 07 code and translation dictionaries are present. Current host
+and Docker PrestaShop 9.2.0 suite results are recorded in the [status
+matrix](specs/00-geo-remediation-master-plan.md); supported-version locale and
+multistore acceptance remains pending.
 
 ## Operability and validation status
 

@@ -1,11 +1,11 @@
 # Ecommerce GEO foundations
 
-**Status:** Implemented locally; PHP/runtime, security, and test-shop acceptance pending. Admin UI scope is the current single-page configuration and audit interface described below.
+**Status:** Implemented locally; current host and Docker PrestaShop 9.2.0 suites pass. Supported-version, security, hook, and theme acceptance remains pending. Admin UI scope is the current single-page configuration and audit interface described below.
 **Target:** `llmscatalog` v1.4.0
 **Updated:** 2026-10-10
 
 
-> **Current UI scope:** The implemented back-office experience is one module configuration page with publishing/rich-product settings, per-shop augmentation switches, a current-shop/current-language read-only audit, cancelable batches, JSON report download, and one-time XML/TSV comparison. The save path requires a completed audit with no blocker findings and explicit preview confirmation before enabling augmentation. This interface does not implement a multi-section dashboard, interactive entity/field controls, a generated proposed-JSON-LD preview pane, persistent audit history, analytics measurement UX, or search-console integrations. References to those experiences elsewhere in this specification are future-work design guidance, not current acceptance criteria. Current acceptance covers only the implemented page and route behavior.
+> **Current UI scope:** The implemented back-office experience is one module configuration page with publishing/rich-product settings, per-shop augmentation switches, a current-shop/current-language read-only audit, cancelable batches, JSON report download, and one-time XML/TSV comparison. The save path requires a completed audit with no blocker findings and acknowledgement that the audit report was reviewed. The checkbox is an acknowledgement; the page does not show a generated proposed-JSON-LD preview pane. This interface does not implement a multi-section dashboard, interactive entity/field controls, persistent audit history, analytics measurement UX, or search-console integrations. References to those experiences elsewhere in this specification are future-work design guidance, not current acceptance criteria. Current acceptance covers only the implemented page and route behavior.
 
 ## 1. Context
 
@@ -31,7 +31,7 @@ Ship one installed module with three isolated responsibilities:
 3. **Structured-data augmentation**
    - Optional and disabled by default.
    - Complete missing Offer fields on one unambiguous canonical Product entity; supplement incomplete Microdata with a canonical Product JSON-LD node.
-   - Keep Organization and Breadcrumb JSON-LD missing-only. Never overwrite populated conflicting values or mutate malformed or ambiguous markup.
+   - Complete missing Organization contact and postal-address details from the current shop settings on one homepage-matched entity. Never overwrite populated values or mutate malformed or ambiguous markup. Breadcrumb JSON-LD remains missing-only.
 
 The module diagnoses but never rewrites:
 
@@ -46,7 +46,7 @@ The module diagnoses but never rewrites:
 ## 3. Design principles
 
 - **Audit first:** merchants see current evidence before enabling augmentation.
-- **Bounded ownership:** Product augmentation fills only absent Offer properties on an exact canonical entity; Organization and Breadcrumb augmentation remain wholly missing-only.
+- **Bounded ownership:** Product augmentation fills only absent Offer properties on an exact canonical entity; Organization augmentation fills only missing contact/address properties on one homepage-matched entity; Breadcrumb augmentation remains missing-only.
 - **Rendered-output truth:** storefront checks inspect the final HTML rather than inferring behavior from database fields alone.
 - **Public-context parity:** price, currency, availability, URLs, and visibility use the anonymous public shop context.
 - **Conflict means no mutation:** uncertainty suppresses augmentation.
@@ -61,7 +61,7 @@ The module diagnoses but never rewrites:
 | Surface | Validate | Optional augmentation | Authoritative owner |
 | --- | --- | --- | --- |
 | Product and Offer JSON-LD / Microdata | Yes | Missing Offer fields; Microdata is supplemented with JSON-LD | Theme, existing SEO module, or `llmscatalog` when explicitly enabled |
-| Organization JSON-LD | Yes | Missing-only | Merchant/theme, or `llmscatalog` when explicitly enabled |
+| Organization JSON-LD | Yes | Missing contactPoint/address fields on one matching entity | Merchant/theme, or `llmscatalog` when explicitly enabled |
 | Breadcrumb JSON-LD | Yes | Missing-only | Theme, or `llmscatalog` when explicitly enabled |
 | Product variant prices | Yes | AggregateOffer range for bounded combination sets | Theme or `llmscatalog` when explicitly enabled |
 | Merchant Center feed | Optional snapshot comparison | No | Merchant Center integration/feed provider |
@@ -74,6 +74,11 @@ The module diagnoses but never rewrites:
 | Buying/comparison/FAQ content | Structural audit | No | Merchant/editorial workflow |
 | Search Console | Guided measurement | No API access | Merchant |
 | AI referral analytics | Guided measurement | No data ingestion | Merchant analytics stack |
+
+When Organization augmentation is enabled and no Organization entity already
+exists, the generated entity includes the current language's shop meta
+description. If that value is blank, it uses the default-language shop meta
+description; when both values are blank, it omits `description`.
 
 ## 5. Module architecture
 
@@ -537,7 +542,7 @@ Customer-group, personalized, location-dependent, tax-exempt, or negotiated pric
 
 The current admin experience is one Symfony configuration page. It contains the publishing and rich-product settings, per-shop augmentation switches, the audit controls, JSON report download, and one-time XML/TSV feed snapshot comparison. The audit is scoped to the current shop and language and displays the returned report as JSON. It samples the homepage, up to 10 categories, and up to 25 products. Audit work runs in batches of at most five, can be canceled between requests, and report/session state expires after 15 minutes.
 
-When saving augmentation settings, the controller requires a completed audit for the current shop and language, no blocker findings, and explicit confirmation that the proposed augmentation preview was reviewed. The page does not currently render a structured interactive preview; the confirmation is a required acknowledgement associated with the audit report and deterministic conflict-checked runtime behavior.
+When saving augmentation settings, the controller requires a completed audit for the current shop and language, no blocker findings, and acknowledgement that the audit report was reviewed. The page does not render a generated JSON-LD preview; the checkbox records review of the audit report and the deterministic conflict-checked behavior.
 
 The page does not provide persistent audit history, configurable audit sections, dashboard metrics, visual entity inspectors, copyable crawler policy controls, external measurement integrations, or analytics ingestion.
 
@@ -557,7 +562,7 @@ Enabling a switch requires:
 
 1. a completed audit;
 2. no unresolved blocker for that surface;
-3. acknowledgement that the current audit and proposed augmentation preview were reviewed;
+3. acknowledgement that the current audit report was reviewed;
 4. a warning that Product augmentation fills only missing fields on one canonical entity and stands down on conflicting or ambiguous markup.
 
 At runtime, augmentation is suppressed when:
@@ -785,7 +790,7 @@ For the implemented foundation and current single-page interface, acceptance req
 - public catalog checks use an anonymous public context;
 - Product/Offer, Organization, and Breadcrumb JSON-LD are parsed and validated;
 - complete existing product markup prevents duplicate augmentation, while unambiguous missing Offer fields can be filled;
-- Organization and Breadcrumb JSON-LD remain missing-only;
+- Organization JSON-LD fills missing contact/address values from PrestaShop Contact details on one matching entity; Breadcrumb JSON-LD remains missing-only;
 - malformed or ambiguous pages are never mutated;
 - augmentation is disabled by default and reversible through configuration;
 - robots, sitemaps, canonicals, `hreflang`, feeds, and editorial content remain read-only;
@@ -793,7 +798,7 @@ For the implemented foundation and current single-page interface, acceptance req
 - feed fetching is protected against SSRF;
 - image findings distinguish missing, decorative, informative, and functional alternatives;
 - no automatic content or FAQ page generation exists;
-- current admin scope exposes settings, audit, report download, feed snapshot comparison, and the audit/no-blocker/preview-acknowledgement save gate;
+- current admin scope exposes settings, audit, report download, feed snapshot comparison, and the audit/no-blocker/report-review acknowledgement save gate;
 - findings expose the evidence, severity, and remediation details supplied by the audit model;
 - no external LLM or hosted runtime service is required;
 - tests cover conflicts, multistore, localization, security, and rollback;

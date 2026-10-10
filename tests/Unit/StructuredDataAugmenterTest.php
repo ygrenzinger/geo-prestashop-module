@@ -32,6 +32,110 @@ final class StructuredDataAugmenterTest extends TestCase
         self::assertSame('A locally sourced description.', json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR)['description']);
     }
 
+    public function testAddsOrganizationContactPointAndPostalAddressWhenNoEntityExists(): void
+    {
+        $candidate = $this->organizationCandidate();
+        $html = '<html><head><link rel="canonical" href="https://shop.example/"></head><body></body></html>';
+
+        $result = (new StructuredDataAugmenter())->augment($html, $candidate, 'Organization', true);
+        preg_match('/<script type="application\\/ld\\+json">(.*?)<\\/script>/', $result, $matches);
+        $organization = json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertSame('ContactPoint', $organization['contactPoint']['@type']);
+        self::assertSame('customer service', $organization['contactPoint']['contactType']);
+        self::assertSame('hello@shop.example', $organization['contactPoint']['email']);
+        self::assertSame('+33 1 23 45 67 89', $organization['contactPoint']['telephone']);
+        self::assertSame('PostalAddress', $organization['address']['@type']);
+        self::assertSame('4 rue du Test, Bâtiment B', $organization['address']['streetAddress']);
+        self::assertSame('Paris', $organization['address']['addressLocality']);
+        self::assertSame('FR', $organization['address']['addressCountry']);
+    }
+
+    public function testFillsMissingOrganizationFieldsWithoutReplacingPopulatedValues(): void
+    {
+        $html = '<html><head><link rel="canonical" href="https://shop.example/">'
+            . '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","@id":"https://shop.example/#organization","url":"https://shop.example/","name":"Shop","contactPoint":{"@type":"ContactPoint","contactType":"customer service","telephone":"+33 9 00 00 00 00"},"address":{"@type":"PostalAddress","streetAddress":"Existing address","addressCountry":"FR"}}</script>'
+            . '</head><body></body></html>';
+
+        $result = (new StructuredDataAugmenter())->augment($html, $this->organizationCandidate(), 'Organization', true);
+        preg_match('/<script type="application\\/ld\\+json">(.*?)<\\/script>/', $result, $matches);
+        $organization = json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertSame('+33 9 00 00 00 00', $organization['contactPoint']['telephone']);
+        self::assertSame('hello@shop.example', $organization['contactPoint']['email']);
+        self::assertSame('Existing address', $organization['address']['streetAddress']);
+        self::assertSame('Paris', $organization['address']['addressLocality']);
+        self::assertSame('75001', $organization['address']['postalCode']);
+    }
+
+    public function testAddsGeneralContactPointAlongsideExistingSpecializedContact(): void
+    {
+        $candidate = $this->organizationCandidate();
+        unset($candidate['address']);
+        $html = '<html><head><link rel="canonical" href="https://shop.example/">'
+            . '<script type="application/ld+json">{"@type":"Organization","url":"https://shop.example/","contactPoint":{"@type":"ContactPoint","contactType":"technical support","telephone":"+33 8 00 00 00 00"}}</script>'
+            . '</head></html>';
+
+        $result = (new StructuredDataAugmenter())->augment($html, $candidate, 'Organization', true);
+        preg_match('/<script type="application\\/ld\\+json">(.*?)<\\/script>/', $result, $matches);
+        $organization = json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertCount(2, $organization['contactPoint']);
+        self::assertSame('technical support', $organization['contactPoint'][0]['contactType']);
+        self::assertSame('customer service', $organization['contactPoint'][1]['contactType']);
+    }
+
+    public function testDoesNotPatchAmbiguousOrUnmatchedOrganizationEntities(): void
+    {
+        $candidate = $this->organizationCandidate();
+        $multiple = '<html><head><link rel="canonical" href="https://shop.example/">'
+            . '<script type="application/ld+json">[{"@type":"Organization","url":"https://shop.example/"},{"@type":"Organization","url":"https://shop.example/#other"}]</script>'
+            . '</head></html>';
+        $unmatched = '<html><head><link rel="canonical" href="https://shop.example/">'
+            . '<script type="application/ld+json">{"@type":"Organization","url":"https://other.example/"}</script>'
+            . '</head></html>';
+
+        self::assertSame($multiple, (new StructuredDataAugmenter())->augment($multiple, $candidate, 'Organization', true));
+        self::assertSame($unmatched, (new StructuredDataAugmenter())->augment($unmatched, $candidate, 'Organization', true));
+    }
+
+    public function testLeavesAmbiguousNestedContactAndAddressValuesUnchanged(): void
+    {
+        $html = '<html><head><link rel="canonical" href="https://shop.example/">'
+            . '<script type="application/ld+json">{"@type":"Organization","url":"https://shop.example/","contactPoint":[{"@type":"ContactPoint","contactType":"customer service","telephone":"111"},{"@type":"ContactPoint","contactType":"customer service","telephone":"222"}],"address":[{"@type":"PostalAddress","addressCountry":"FR"},{"@type":"PostalAddress","addressCountry":"BE"}]}</script>'
+            . '</head></html>';
+
+        self::assertSame($html, (new StructuredDataAugmenter())->augment($html, $this->organizationCandidate(), 'Organization', true));
+    }
+
+    public function testPatchesOrganizationInsideJsonLdGraph(): void
+    {
+        $html = '<html><head><link rel="canonical" href="https://shop.example/">'
+            . '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://shop.example/#organization","url":"https://shop.example/","name":"Shop"}]}</script>'
+            . '</head></html>';
+
+        $result = (new StructuredDataAugmenter())->augment($html, $this->organizationCandidate(), 'Organization', true);
+        preg_match('/<script type="application\\/ld\\+json">(.*?)<\\/script>/', $result, $matches);
+        $graph = json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR)['@graph'];
+
+        self::assertSame('hello@shop.example', $graph[0]['contactPoint']['email']);
+        self::assertSame('Paris', $graph[0]['address']['addressLocality']);
+    }
+
+    public function testAddsPostalAddressAlongsideExistingPlainTextAddress(): void
+    {
+        $html = '<html><head><link rel="canonical" href="https://shop.example/">'
+            . '<script type="application/ld+json">{"@type":"Organization","url":"https://shop.example/","address":"4 rue du Test, Paris"}</script>'
+            . '</head></html>';
+
+        $result = (new StructuredDataAugmenter())->augment($html, $this->organizationCandidate(), 'Organization', true);
+        preg_match('/<script type="application\\/ld\\+json">(.*?)<\\/script>/', $result, $matches);
+        $organization = json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertSame('4 rue du Test, Paris', $organization['address'][0]);
+        self::assertSame('PostalAddress', $organization['address'][1]['@type']);
+    }
+
     public function testMalformedExistingMarkupIsNeverChanged(): void
     {
         $html = '<html><head><link rel="canonical" href="https://shop.example/"><script type="application/ld+json">{</script></head></html>';
@@ -84,5 +188,29 @@ final class StructuredDataAugmenterTest extends TestCase
     {
         return ['@context'=>'https://schema.org','@type'=>'Product','@id'=>'https://shop.example/p#product','url'=>'https://shop.example/p','name'=>'Product',
             'offers'=>['@type'=>'Offer','url'=>'https://shop.example/p','price'=>'12.00','priceCurrency'=>'EUR','availability'=>'https://schema.org/InStock']];
+    }
+
+    private function organizationCandidate(): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            '@id' => 'https://shop.example/#organization',
+            'name' => 'Shop',
+            'url' => 'https://shop.example/',
+            'contactPoint' => [
+                '@type' => 'ContactPoint',
+                'contactType' => 'customer service',
+                'email' => 'hello@shop.example',
+                'telephone' => '+33 1 23 45 67 89',
+            ],
+            'address' => [
+                '@type' => 'PostalAddress',
+                'streetAddress' => '4 rue du Test, Bâtiment B',
+                'postalCode' => '75001',
+                'addressLocality' => 'Paris',
+                'addressCountry' => 'FR',
+            ],
+        ];
     }
 }

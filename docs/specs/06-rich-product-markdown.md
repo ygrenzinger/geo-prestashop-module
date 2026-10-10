@@ -1,6 +1,6 @@
 # Spec 06: Rich, trustworthy product Markdown
 
-**Status:** Implemented in remediation 06; runtime acceptance pending CI and test shop  
+**Status:** Implemented in remediation 06; current host and Docker PrestaShop 9.2.0 suites pass. Supported-version and 10,000-product acceptance remains pending; see the [status matrix](00-geo-remediation-master-plan.md).
 **Date:** 2026-09-23  
 **Target:** PrestaShop 9.x  
 **Module:** `llmscatalog`  
@@ -862,9 +862,10 @@ and suppress `Last-Modified` because complete source freshness cannot yet be
 established. Provider contributions use structured v1 records and fail-open
 validation. See [rich product Markdown operations](../rich-product-markdown.md).
 
-Focused HTML-to-Markdown and provider-schema unit tests were added but were not
-executed. Remaining acceptance checks are runtime gates: PHP lint and full
-unit/integration/snapshot suites; PrestaShop 9.0.2 and supported 9.1.x install,
-upgrade, and smoke tests; product-type and visitor-state comparisons; query and
-memory budgets with 10,000 products; invalidation coverage; and final package
-installation. ZIP creation remains with remediation 09.
+Focused HTML-to-Markdown and provider-schema tests are included in the current
+host suite. Current lint and host/Docker suite results are recorded in the
+[status matrix](00-geo-remediation-master-plan.md). Remaining acceptance checks
+are PrestaShop 9.0.2 and supported 9.1.x install, upgrade, and smoke tests;
+product-type and visitor-state comparisons; query and memory budgets with
+10,000 products; invalidation coverage; and final package installation. ZIP
+creation remains with remediation 09.

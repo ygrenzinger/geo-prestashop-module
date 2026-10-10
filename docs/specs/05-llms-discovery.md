@@ -1,6 +1,6 @@
 # llms.txt v2 discovery
 
-Status: Implemented locally; runtime validation pending  
+Status: Implemented locally; current host and Docker PrestaShop 9.2.0 suites pass. Supported-version and theme acceptance remains pending; see the [status matrix](00-geo-remediation-master-plan.md).
 Target module version: `1.1.0`  
 Scope: Discovery and localization behavior for `llmscatalog`
 

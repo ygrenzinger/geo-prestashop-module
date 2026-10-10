@@ -4,10 +4,12 @@ namespace LlmsCatalog\Service;
 
 use Configuration;
 use Context;
+use Country;
 use Image;
 use Product;
+use State;
 
-/** Builds opt-in, missing-only JSON-LD for the current public page. */
+/** Builds opt-in structured data for the current public page. */
 final class StructuredDataPageAugmentationService
 {
     public function augment(array &$params): void
@@ -120,7 +122,58 @@ final class StructuredDataPageAugmentationService
             $candidate['description'] = $description;
         }
 
+        $detailsResolver = new OrganizationDetailsResolver();
+        $contactPoint = $detailsResolver->contactPoint(
+            (string) Configuration::get('PS_SHOP_EMAIL', null, $groupId, $shopId),
+            (string) Configuration::get('PS_SHOP_PHONE', null, $groupId, $shopId)
+        );
+        if ($contactPoint !== null) {
+            $candidate['contactPoint'] = $contactPoint;
+        }
+
+        $address = $detailsResolver->postalAddress($this->organizationAddressFields($languageId, $groupId, $shopId));
+        if ($address !== null) {
+            $candidate['address'] = $address;
+        }
+
         return $candidate;
+    }
+
+    private function organizationAddressFields(int $languageId, int $groupId, int $shopId): array
+    {
+        $addressLines = array_values(array_filter([
+            trim((string) Configuration::get('PS_SHOP_ADDR1', null, $groupId, $shopId)),
+            trim((string) Configuration::get('PS_SHOP_ADDR2', null, $groupId, $shopId)),
+        ], static fn (string $line): bool => $line !== ''));
+
+        $countryId = (int) Configuration::get('PS_SHOP_COUNTRY_ID', null, $groupId, $shopId);
+        if ($countryId < 1) {
+            $countryId = (int) Configuration::get('PS_COUNTRY_DEFAULT', null, $groupId, $shopId);
+        }
+        $countryCode = '';
+        if ($countryId > 0) {
+            $country = new Country($countryId, $languageId);
+            if (\Validate::isLoadedObject($country)) {
+                $countryCode = (string) $country->iso_code;
+            }
+        }
+
+        $region = '';
+        $stateId = (int) Configuration::get('PS_SHOP_STATE_ID', null, $groupId, $shopId);
+        if ($stateId > 0) {
+            $state = new State($stateId);
+            if (\Validate::isLoadedObject($state) && (int) $state->id_country === $countryId) {
+                $region = (string) $state->name;
+            }
+        }
+
+        return [
+            'streetAddress' => implode(', ', $addressLines),
+            'postalCode' => (string) Configuration::get('PS_SHOP_CODE', null, $groupId, $shopId),
+            'addressLocality' => (string) Configuration::get('PS_SHOP_CITY', null, $groupId, $shopId),
+            'addressRegion' => $region,
+            'addressCountry' => $countryCode,
+        ];
     }
 
     private function productCandidate(Context $context, int $productId, array $product, array $details, int $languageId): ?array

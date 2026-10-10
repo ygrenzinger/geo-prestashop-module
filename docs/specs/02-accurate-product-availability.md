@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented in source; PHP-enabled CI and PrestaShop test-shop validation pending.
+Implemented in source; current host and Docker PrestaShop 9.2.0 suites pass. Supported-version stock, catalog-mode, and multistore validation remains pending; see the [status matrix](00-geo-remediation-master-plan.md).
 
 ## Compatibility
 

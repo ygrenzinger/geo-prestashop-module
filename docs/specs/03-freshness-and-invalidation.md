@@ -1,6 +1,6 @@
 # Freshness, invalidation, and HTTP caching
 
-**Status:** Implemented locally; runtime validation pending  
+**Status:** Implemented locally; current host and Docker PrestaShop 9.2.0 suites pass. Supported-version and multi-node cache acceptance remains pending; see the [status matrix](00-geo-remediation-master-plan.md).
 **Target module version:** 1.1.0  
 **Minimum PrestaShop version:** 9.0.2  
 **Catalog scale target:** Up to 10,000 public products per shop

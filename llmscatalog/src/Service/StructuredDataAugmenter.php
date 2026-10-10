@@ -39,6 +39,10 @@ final class StructuredDataAugmenter
             return $html;
         }
 
+        if ($type === 'Organization') {
+            return $this->augmentOrganization($html, $candidate);
+        }
+
         $inspector = new StructuredDataInspector();
         $inspection = $inspector->inspect($html);
         if (!$inspection['parseable']) {
@@ -313,5 +317,317 @@ final class StructuredDataAugmenter
         if (strlen($json)>16384 || !preg_match('/<head(?:\\s[^>]*)?>/i',$html) || !preg_match('/<\\/head\\s*>/i',$html)) return $html;
         $script='<script type="application/ld+json">'.$json.'</script>';
         return preg_replace('/<\\/head\\s*>/i',$script.'</head>',$html,1)??$html;
+    }
+
+    private function augmentOrganization(string $html, array $candidate): string
+    {
+        if (($candidate['@type'] ?? null) !== 'Organization'
+            || !is_string($candidate['url'] ?? null)
+            || !$this->canonicalPageAllows($html, $candidate['url'])) {
+            return $html;
+        }
+
+        $inspection = (new StructuredDataInspector())->inspect($html);
+        if (!$inspection['parseable']) {
+            return $html;
+        }
+
+        $organizations = array_values(array_filter(
+            $inspection['entities'],
+            fn (array $entity): bool => $this->isOrganizationType($entity['@type'] ?? null)
+        ));
+
+        if (!$organizations) {
+            return $this->appendJsonLdCandidate($html, $candidate);
+        }
+
+        $matched = array_values(array_filter(
+            $organizations,
+            fn (array $entity): bool => $this->matchesCanonical($entity, $candidate['url'])
+        ));
+        if (count($matched) !== 1) {
+            return $html;
+        }
+
+        return $this->patchJsonLdOrganization($html, $candidate, $candidate['url']) ?? $html;
+    }
+
+    private function patchJsonLdOrganization(string $html, array $candidate, string $canonical): ?string
+    {
+        $scripts = $this->jsonLdScripts($html);
+        if ($scripts === null) {
+            return null;
+        }
+
+        $count = 0;
+        foreach ($scripts as $script) {
+            $count += $this->countMatchingOrganizations($script['data'], $canonical);
+        }
+        if ($count !== 1) {
+            return null;
+        }
+
+        foreach ($scripts as $script) {
+            $changed = false;
+            if (!$this->patchOrganizationTree($script['data'], $candidate, $canonical, $changed)) {
+                continue;
+            }
+            try {
+                $json = json_encode(
+                    $script['data'],
+                    JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                        | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+                );
+            } catch (\Throwable $exception) {
+                return null;
+            }
+            if (!$changed || strlen($json) > 16384
+                || !preg_match('/^<script\\b[^>]*>/i', $script['whole'], $opening)) {
+                return null;
+            }
+            $closingOffset = strripos($script['whole'], '</script');
+            if ($closingOffset === false) {
+                return null;
+            }
+            $replacement = $opening[0] . $json . substr($script['whole'], $closingOffset);
+            return str_replace($script['whole'], $replacement, $html);
+        }
+
+        return null;
+    }
+
+    private function patchOrganizationTree(array &$value, array $candidate, string $canonical, bool &$changed): bool
+    {
+        if (!array_is_list($value)
+            && $this->isOrganizationType($value['@type'] ?? null)
+            && $this->matchesCanonical($value, $canonical)) {
+            if (is_array($candidate['contactPoint'] ?? null)) {
+                $this->mergeContactPoint($value, $candidate['contactPoint'], $changed);
+            }
+            if (is_array($candidate['address'] ?? null)) {
+                $this->mergePostalAddress($value, $candidate['address'], $changed);
+            }
+
+            return true;
+        }
+
+        foreach ($value as &$child) {
+            if (is_array($child) && $this->patchOrganizationTree($child, $candidate, $canonical, $changed)) {
+                unset($child);
+                return true;
+            }
+        }
+        unset($child);
+        return false;
+    }
+
+    private function countMatchingOrganizations(mixed $value, string $canonical): int
+    {
+        if (!is_array($value)) {
+            return 0;
+        }
+        $count = !array_is_list($value)
+            && $this->isOrganizationType($value['@type'] ?? null)
+            && $this->matchesCanonical($value, $canonical) ? 1 : 0;
+        foreach ($value as $child) {
+            if (is_array($child)) {
+                $count += $this->countMatchingOrganizations($child, $canonical);
+            }
+        }
+
+        return $count;
+    }
+
+    private function mergeContactPoint(array &$organization, array $candidate, bool &$changed): void
+    {
+        $existing = $organization['contactPoint'] ?? null;
+        if ($existing === null || $existing === '') {
+            $organization['contactPoint'] = $candidate;
+            $changed = true;
+            return;
+        }
+
+        if (is_string($existing) && trim($existing) !== '') {
+            $organization['contactPoint'] = [$existing, $candidate];
+            $changed = true;
+            return;
+        }
+        if (!is_array($existing)) {
+            return;
+        }
+
+        if (!array_is_list($existing)) {
+            if (!$this->isContactPoint($existing)
+                || $this->hasDifferentContactType($existing, $candidate)) {
+                $organization['contactPoint'] = [$existing, $candidate];
+                $changed = true;
+                return;
+            }
+            $organization['contactPoint'] = $this->fillMissingFields($existing, $candidate, $changed);
+            return;
+        }
+
+        $matchingIndexes = [];
+        foreach ($existing as $index => $contactPoint) {
+            if (is_array($contactPoint) && $this->isContactPoint($contactPoint)
+                && !$this->hasDifferentContactType($contactPoint, $candidate)) {
+                $matchingIndexes[] = $index;
+            }
+        }
+        if (count($matchingIndexes) > 1) {
+            return;
+        }
+        if (!$matchingIndexes) {
+            $existing[] = $candidate;
+            $changed = true;
+        } else {
+            $index = $matchingIndexes[0];
+            $existing[$index] = $this->fillMissingFields($existing[$index], $candidate, $changed);
+        }
+        $organization['contactPoint'] = $existing;
+    }
+
+    private function mergePostalAddress(array &$organization, array $candidate, bool &$changed): void
+    {
+        $existing = $organization['address'] ?? null;
+        if ($existing === null || $existing === '' || $existing === []) {
+            $organization['address'] = $candidate;
+            $changed = true;
+            return;
+        }
+
+        if (is_string($existing) && trim($existing) !== '') {
+            $organization['address'] = [$existing, $candidate];
+            $changed = true;
+            return;
+        }
+        if (!is_array($existing)) {
+            return;
+        }
+
+        if (!array_is_list($existing)) {
+            if (!$this->isPostalAddress($existing)) {
+                return;
+            }
+            $organization['address'] = $this->fillMissingFields($existing, $candidate, $changed);
+            return;
+        }
+
+        $matchingIndexes = [];
+        foreach ($existing as $index => $address) {
+            if (is_array($address) && $this->isPostalAddress($address)) {
+                $matchingIndexes[] = $index;
+            }
+        }
+        if (count($matchingIndexes) !== 1) {
+            if (!$matchingIndexes) {
+                $existing[] = $candidate;
+                $organization['address'] = $existing;
+                $changed = true;
+            }
+            return;
+        }
+        $index = $matchingIndexes[0];
+        $existing[$index] = $this->fillMissingFields($existing[$index], $candidate, $changed);
+        $organization['address'] = $existing;
+    }
+
+    private function fillMissingFields(array $target, array $candidate, bool &$changed): array
+    {
+        foreach ($candidate as $field => $value) {
+            if (!array_key_exists($field, $target) || $target[$field] === null || $target[$field] === '') {
+                $target[$field] = $value;
+                $changed = true;
+            }
+        }
+
+        return $target;
+    }
+
+    private function hasDifferentContactType(array $contactPoint, array $candidate): bool
+    {
+        $existing = trim((string) ($contactPoint['contactType'] ?? ''));
+        $desired = trim((string) ($candidate['contactType'] ?? ''));
+
+        return $existing !== '' && strcasecmp($existing, $desired) !== 0;
+    }
+
+    private function isOrganizationType(mixed $types): bool
+    {
+        return $this->isOneOfTypes($types, ['Organization', 'OnlineStore', 'OnlineBusiness', 'LocalBusiness']);
+    }
+
+    private function isContactPoint(array $value): bool
+    {
+        if (isset($value['@type'])) {
+            return $this->isOneOfTypes($value['@type'], ['ContactPoint']);
+        }
+
+        return !$value || isset($value['contactType']) || isset($value['email']) || isset($value['telephone']);
+    }
+
+    private function isPostalAddress(array $value): bool
+    {
+        if (!isset($value['@type'])) {
+            return !$value || isset($value['streetAddress']) || isset($value['postalCode'])
+                || isset($value['addressLocality']) || isset($value['addressRegion'])
+                || isset($value['addressCountry']);
+        }
+
+        return $this->isOneOfTypes($value['@type'], ['PostalAddress']);
+    }
+
+    private function isOneOfTypes(mixed $types, array $expected): bool
+    {
+        foreach ((array) $types as $type) {
+            $parts = explode('/', (string) $type);
+            if (in_array((string) end($parts), $expected, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function jsonLdScripts(string $html): ?array
+    {
+        $scripts = [];
+        if (!preg_match_all('/<script\\b([^>]*)>(.*?)<\\/script\\s*>/is', $html, $matches, PREG_SET_ORDER)) {
+            return $scripts;
+        }
+        foreach ($matches as $match) {
+            if (!preg_match('/\\btype\\s*=\\s*(?:"application\\/ld\\+json"|\'application\\/ld\\+json\'|application\\/ld\\+json)/i', $match[1])) {
+                continue;
+            }
+            try {
+                $scripts[] = [
+                    'whole' => $match[0],
+                    'data' => json_decode($match[2], true, 64, JSON_THROW_ON_ERROR),
+                ];
+            } catch (\Throwable $exception) {
+                return null;
+            }
+        }
+
+        return $scripts;
+    }
+
+    private function appendJsonLdCandidate(string $html, array $candidate): string
+    {
+        try {
+            $json = json_encode(
+                $candidate,
+                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                    | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+            );
+        } catch (\Throwable $exception) {
+            return $html;
+        }
+        if (strlen($json) > 16384 || !preg_match('/<head(?:\\s[^>]*)?>/i', $html)
+            || !preg_match('/<\\/head\\s*>/i', $html)) {
+            return $html;
+        }
+
+        return preg_replace('/<\\/head\\s*>/i', '<script type="application/ld+json">' . $json . '</script></head>', $html, 1) ?? $html;
     }
 }

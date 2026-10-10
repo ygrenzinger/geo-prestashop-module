@@ -2,12 +2,12 @@
 
 ## Status
 
-Implemented; runtime validation pending PHP-enabled CI and a PrestaShop test shop.
+Implemented; current host and Docker PrestaShop 9.2.0 suites pass. Supported-version route, install, and upgrade acceptance remains pending; see the [status matrix](00-geo-remediation-master-plan.md).
 
 ## Compatibility
 
 - Module target: next minor release after `1.0.0`.
-- Approved implementation release: `1.1.0` (Must grouping); runtime validation pending.
+- Approved implementation release: `1.1.0` (Must grouping); supported-version runtime acceptance remains pending.
 - Minimum supported PrestaShop version: **9.0.2**.
 - Public output remains deterministic, localized, shop-isolated, and free of external runtime dependencies.
 - Existing URLs receive bounded backward compatibility through redirects; invalid or ambiguous URLs never silently fall back.
@@ -515,7 +515,8 @@ Cover:
 The implementation adds pure tests for path encoding and normalization,
 shop-base path handling, query filtering, product-ID bounds, locale aliases,
 invalid stored locales, and index Link relation ordering. The remaining
-controller matrix below is a PHP-enabled CI/test-shop gate and has not been run.
+controller matrix below remains a supported-version CI/test-shop gate; current
+host and Docker suite results are recorded in the [status matrix](00-geo-remediation-master-plan.md).
 
 ### Controller integration matrix
 
