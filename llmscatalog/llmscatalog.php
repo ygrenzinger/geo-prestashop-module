@@ -28,7 +28,7 @@ class LlmsCatalog extends Module
     {
         $this->name = 'llmscatalog';
         $this->tab = 'seo';
-        $this->version = '1.3.1';
+        $this->version = '1.3.2';
         $this->author = 'LLMs.txt for PrestaShop';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -219,6 +219,7 @@ class LlmsCatalog extends Module
     /** Keep the PrestaShop hook as a thin adapter; the service fails open. */
     public function hookActionOutputHTMLBefore(array &$params): void
     {
+        if ((new \LlmsCatalog\Service\HomepageMarkdownNegotiator())->handle($params, $this->context, $this)) return;
         (new \LlmsCatalog\Service\StructuredDataPageAugmentationService())->augment($params);
     }
 

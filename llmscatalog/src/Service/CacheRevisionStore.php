@@ -25,8 +25,16 @@ class CacheRevisionStore
     public function matches(array $row, string $type, int $productId): bool
     {
         $current = $this->snapshot((int) $row['id_shop'], $type, $productId);
-        foreach (['settings', 'global_pricing', 'index', 'pricing', 'routing', 'product'] as $field) {
-            if ((int) $row[$field . '_revision'] !== $current[$field]) {
+        $columns = [
+            'settings' => 'settings_revision',
+            'global_pricing' => 'global_pricing_revision',
+            'index' => 'shop_index_revision',
+            'pricing' => 'shop_pricing_revision',
+            'routing' => 'shop_routing_revision',
+            'product' => 'product_revision',
+        ];
+        foreach ($columns as $field => $column) {
+            if (!isset($row[$column]) || (int) $row[$column] !== $current[$field]) {
                 return false;
             }
         }

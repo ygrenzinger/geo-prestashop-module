@@ -7,7 +7,7 @@
 3. Open the module configuration page and review the settings and generated URLs.
 4. Clear PrestaShop/Symfony routing caches if routes were previously cached.
 
-The source declares version 1.3.1 and minimum PrestaShop 9.0.2. Upgrades add missing settings, preserve existing values, create cache/revision storage idempotently, and invalidate old representations. Do not downgrade a shop whose recorded module version is greater than this source version without checking its deployment history. Uninstall removes module configuration and its cache/revision tables.
+The source declares version 1.3.2 and minimum PrestaShop 9.0.2. Upgrades add missing settings, preserve existing values, create cache/revision storage idempotently, and invalidate old representations. Do not downgrade a shop whose recorded module version is greater than this source version without checking its deployment history. Uninstall removes module configuration and its cache/revision tables.
 
 ## Configuration
 
@@ -37,6 +37,8 @@ Internal cache generation/version values and serialized settings are not merchan
 ## Public URLs and traversal
 
 The shop-root `/{base}/llms.txt` route lists active localized indexes for the current shop. Canonical routes use full locales, for example `/en-US/llms.txt`; unambiguous legacy two-letter paths redirect to the full locale. Product and catalog output is built for the current shop and requested active locale.
+
+The shop homepage serves the same localized catalog Markdown when a GET request explicitly prefers `text/markdown` in its `Accept` header. The response has `Content-Type: text/markdown; charset=UTF-8` and `Vary: Accept`. HTML requests keep the normal homepage. This also works at a language-prefixed homepage such as `/fr/`; it does not require a separate `.md` URL.
 
 | Route | Purpose |
 |---|---|
@@ -78,4 +80,4 @@ For rich Markdown or JSON-LD augmentation, turn off the corresponding setting. T
 
 ## Validation boundary
 
-The ZIP is a regenerated source archive for review. Its existence and archive checks do not establish successful PHP execution, PrestaShop installation, upgrade, hook, security, or runtime compatibility; those gates remain pending PHP-enabled CI and supported test shops.
+The ZIP is a regenerated source archive for review. PHP lint and standalone unit tests passed locally for this change. Archive checks do not establish PrestaShop installation, upgrade, hook, security, or runtime compatibility; those gates remain pending PHP-enabled CI and supported test shops.

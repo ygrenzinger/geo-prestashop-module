@@ -19,13 +19,24 @@ scripts/run-integration-tests.sh --testsuite unit
 
 To run against an existing shop instead, point `PS_TEST_SHOP_ROOT` at the shop root (the directory containing `config/config.inc.php`) and run `vendor/bin/phpunit -c phpunit.xml.dist`; `tests/bootstrap.php` loads it. Without a shop, the integration tests self-skip.
 
-The current workspace has not run PHP lint or PHPUnit. Runtime acceptance requires a clean PrestaShop 9.0.2 and supported 9.1.x shop matrix, including install/upgrade, multistore and locale isolation, public visitor-state parity, route/hook behavior, cache invalidation and validators, audit security/cancellation, JSON-LD conflict behavior, and representative large-catalog query/memory checks. Record actual command and shop results before calling acceptance complete.
+PHP lint and the standalone unit suite passed locally for this change. Runtime acceptance requires a clean PrestaShop 9.0.2 and supported 9.1.x shop matrix, including install/upgrade, multistore and locale isolation, public visitor-state parity, route/hook behavior, cache invalidation and validators, audit security/cancellation, JSON-LD conflict behavior, and representative large-catalog query/memory checks. Record actual command and shop results before calling acceptance complete.
 
 For package validation, verify ZIP integrity, `llmscatalog/` archive root, absence of `.DS_Store`, expected current files, and source/archive byte parity. A successful ZIP check validates packaging only.
 
+After deploying to a test shop, check the actual homepage URL (including any redirect to a language-prefixed URL):
+
+```sh
+curl -sS -L -i -H 'Accept: text/markdown' https://yourdomain.com/
+curl -sS -L -i -H 'Accept: text/html' https://yourdomain.com/
+```
+
+Inspect the final response in each redirect chain. The first must be a nonempty Markdown body with `Content-Type: text/markdown` and `Vary: Accept`; the second must be the HTML homepage. Repeat on each shop domain or base URI that matters to the deployment. A CDN must include `Accept` in its cache key or bypass caching for these homepage variants.
+
+Local smoke check on the mounted PrestaShop 9.2.0 test shop: `/index.php` returned 200 with 5,402 bytes of Markdown, `Content-Type: text/markdown; charset=UTF-8`, and `Vary: Accept` for the Markdown request. The HTML request returned 200 with the rendered storefront and `Vary: Accept,Accept-Encoding`. The test container's `/` URL currently redirects to itself for both requests before the page hook runs, so the exact root URL needs verification on a correctly routed deployment. The Docker integration suite passed (6 tests, 26 assertions), including revision column matching so cache reads cannot prepend PHP warnings to Markdown.
+
 ## Install and upgrade
 
-Install the preserved `llmscatalog/` wrapper under `modules/`, install through Module Manager, and clear PrestaShop/Symfony route caches if needed. Source version is 1.3.1 and minimum PrestaShop is 9.0.2. Upgrade scripts add missing settings and schema idempotently while preserving stored values. Confirm installed version history before downgrade. Uninstall removes module settings and disposable cache/revision tables.
+Install the preserved `llmscatalog/` wrapper under `modules/`, install through Module Manager, and clear PrestaShop/Symfony route caches if needed. Source version is 1.3.2 and minimum PrestaShop is 9.0.2. Upgrade scripts add missing settings and schema idempotently while preserving stored values. Confirm installed version history before downgrade. Uninstall removes module settings and disposable cache/revision tables.
 
 ## Operations
 
@@ -41,4 +52,4 @@ Disable rich product Markdown or any augmentation switch in configuration to ret
 
 ## Package and acceptance status
 
-`outputs/llmscatalog.zip` is rebuilt from current source and validated for archive integrity, root structure, `.DS_Store` exclusion, and source/archive parity. PHP/PHPUnit and PrestaShop runtime validation remain pending; see the [remediation status matrix](specs/00-geo-remediation-master-plan.md).
+`outputs/llmscatalog.zip` is rebuilt from current source and validated for archive integrity, root structure, `.DS_Store` exclusion, and source/archive parity. Local PHP lint, standalone PHPUnit, Docker integration tests, and the `/index.php` response smoke check passed for the homepage negotiation change; full PrestaShop runtime validation remains pending; see the [remediation status matrix](specs/00-geo-remediation-master-plan.md).

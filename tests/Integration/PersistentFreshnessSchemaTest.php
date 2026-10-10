@@ -1,6 +1,7 @@
 <?php
 
 use LlmsCatalog\Service\CacheManager;
+use LlmsCatalog\Service\CacheRevisionStore;
 use LlmsCatalog\Service\InvalidationService;
 use PHPUnit\Framework\TestCase;
 
@@ -35,6 +36,28 @@ final class PersistentFreshnessSchemaTest extends TestCase
         $primary = array_values(array_filter($indexes, static fn (array $row): bool => $row['Key_name'] === 'PRIMARY'));
         self::assertCount(1, $primary);
         self::assertSame('cache_key', $primary[0]['Column_name']);
+    }
+
+    public function testRevisionMatchingUsesPersistedColumnNames(): void
+    {
+        self::assertTrue(CacheManager::installTables());
+        $shopId = (int) Context::getContext()->shop->id;
+        $store = new CacheRevisionStore();
+        $snapshot = $store->snapshotForWrite($shopId, 'index');
+        $row = [
+            'id_shop' => $shopId,
+            'settings_revision' => $snapshot['settings'],
+            'global_pricing_revision' => $snapshot['global_pricing'],
+            'shop_index_revision' => $snapshot['index'],
+            'shop_pricing_revision' => $snapshot['pricing'],
+            'shop_routing_revision' => $snapshot['routing'],
+            'product_revision' => $snapshot['product'],
+        ];
+        self::assertTrue($store->matches($row, 'index', 0));
+        $row['shop_index_revision']++;
+        self::assertFalse($store->matches($row, 'index', 0));
+        unset($row['shop_index_revision']);
+        self::assertFalse($store->matches($row, 'index', 0));
     }
 
     public function testProductInvalidationLeavesOtherProductRevisionUntouched(): void

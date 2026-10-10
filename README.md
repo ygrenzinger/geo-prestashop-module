@@ -13,6 +13,8 @@
 
 Copy the `llmscatalog/` directory into PrestaShop `modules/`, install **LLMs.txt for PrestaShop** in Module Manager, then open its configuration page. If friendly routes were previously cached, clear PrestaShop/Symfony caches after installation. The ZIP at `outputs/llmscatalog.zip` preserves the required `llmscatalog/` archive root.
 
+The storefront homepage also negotiates Markdown: `Accept: text/markdown` returns the localized catalog as `text/markdown` with `Vary: Accept`, while `Accept: text/html` keeps the rendered HTML homepage. This applies to the shop homepage URL itself when the module is enabled.
+
 ## Documentation
 
 - [User guide](docs/user-guide.md) — installation, settings, endpoints, audit, operations, rollback
@@ -26,4 +28,4 @@ Copy the `llmscatalog/` directory into PrestaShop `modules/`, install **LLMs.txt
 
 ## Validation status
 
-Source implementation and focused test files are present, and the ZIP is a regenerated source archive. PHP lint, PHPUnit, PrestaShop installation/upgrade, security, and runtime behavior have not been validated in this workspace; release acceptance remains pending PHP-enabled CI and a PrestaShop 9.0.2/supported 9.1.x test-shop matrix. See the [status matrix](docs/specs/00-geo-remediation-master-plan.md).
+Source implementation and focused test files are present, and the ZIP is a regenerated source archive. PHP lint and standalone unit tests passed locally for this change; full PrestaShop installation/upgrade, security, and runtime behavior remain to be validated; release acceptance remains pending PHP-enabled CI and a PrestaShop 9.0.2/supported 9.1.x test-shop matrix. See the [status matrix](docs/specs/00-geo-remediation-master-plan.md).
