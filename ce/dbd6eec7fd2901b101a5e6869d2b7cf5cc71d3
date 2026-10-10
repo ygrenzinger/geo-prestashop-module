@@ -1,0 +1,111 @@
+docs/user-guide.md
+  s_d0977efddcda0f::t_5d11befbb9f341 41
+  s_f5f50ba249f6f8::t_1e0ecfb572cd18 10,33
+  s_f5f50ba249f6f8::t_820cefe93e5475 65
+  s_f5f50ba249f6f8::t_40eab750a12d53 83
+  s_d0977efddcda0f::t_7a2931b0bfbca4 74,79
+tests/Unit/StructuredDataAugmenterTest.php
+  s_f5f50ba249f6f8::t_f225e6b592a380 35-72,75-78,80-101,192-214
+  s_f5f50ba249f6f8::t_b2ccc797a8ff63 125-138,215
+  s_f5f50ba249f6f8::t_1483988e0e4209 73-74,79
+  s_f5f50ba249f6f8::t_f1e44b0a3dd18d 102-124
+tests/Unit/OrganizationDetailsResolverTest.php
+  s_f5f50ba249f6f8::t_f225e6b592a380 1-64
+llmscatalog/src/Service/OrganizationDetailsResolver.php
+  s_f5f50ba249f6f8::t_33b63aec804fee 1-56
+docs/adr/0010-organization-contact-data-augmentation.md
+  s_f5f50ba249f6f8::t_e6aa43f8aa4fc5 1-43
+docs/rich-product-markdown.md
+  s_f5f50ba249f6f8::t_40eab750a12d53 63
+docs/specs/09-ecommerce-geo-foundations.md
+  s_f5f50ba249f6f8::t_1e0ecfb572cd18 34,49,64,793
+  s_d0977efddcda0f::t_5def046d0001e5 3,8,78-82,545,565,801
+docs/adr/0008-geo-audit-and-missing-only-augmentation.md
+  s_f5f50ba249f6f8::t_820cefe93e5475 6-8
+docs/specs/00-geo-remediation-master-plan.md
+  s_d0977efddcda0f::t_941bf734905bc9 66-73,101
+  s_d0977efddcda0f::t_8d24cfca463d7a 57
+  s_f5f50ba249f6f8::t_40eab750a12d53 76
+  s_f5f50ba249f6f8::t_1e0ecfb572cd18 4,21,48,58-60,98
+  s_f5f50ba249f6f8::t_2ed6f60c7b7fcf 3
+docs/testing-and-operations.md
+  s_d0977efddcda0f::t_5d11befbb9f341 48
+  s_f5f50ba249f6f8::t_2ed6f60c7b7fcf 40
+  s_f5f50ba249f6f8::t_40eab750a12d53 22
+  s_d0977efddcda0f::t_a9c93f2624d39d 31,34,36,52
+docs/architecture.md
+  s_d0977efddcda0f::t_c57a0e0ed1b283 180-183
+  s_f5f50ba249f6f8::t_1e0ecfb572cd18 112-115
+docs/specs/02-accurate-product-availability.md
+  s_d0977efddcda0f::t_5def046d0001e5 5
+docs/specs/08-large-catalog-completeness.md
+  s_d0977efddcda0f::t_60324231759cdd 5
+  s_d0977efddcda0f::t_c57a0e0ed1b283 542-545
+docs/implementation-plan.md
+  s_d0977efddcda0f::t_c57a0e0ed1b283 3-4,29-30,39-40,49-51,58-60,134-135
+docs/specs/05-llms-discovery.md
+  s_d0977efddcda0f::t_5d11befbb9f341 3
+docs/specs/03-freshness-and-invalidation.md
+  s_d0977efddcda0f::t_5d11befbb9f341 3
+CHANGELOG.md
+  s_d0977efddcda0f::t_b4aed68be81adc 19-27
+  s_f5f50ba249f6f8::t_40eab750a12d53 15-17
+  s_d0977efddcda0f::t_21454a03fd7d31 1-6,28-54,56-57
+  s_d0977efddcda0f::t_29e85249d647f5 55
+  s_f5f50ba249f6f8::t_e6aa43f8aa4fc5 7-14,18
+llmscatalog/llmscatalog.php
+  s_f5f50ba249f6f8::t_1e0ecfb572cd18 31
+docs/specs/07-full-localization.md
+  s_d0977efddcda0f::t_5def046d0001e5 5
+llmscatalog/src/Service/StructuredDataAugmenter.php
+  s_f5f50ba249f6f8::t_f76b96d1150d76 562-566,572-574
+  s_f5f50ba249f6f8::t_f190c0f32020df 381,607,623
+  s_f5f50ba249f6f8::t_33b63aec804fee 42-45,321-380,382-449,455-481,483-492,494-498,504-522,528-561,567-571,575-606,608-622,624-632
+  s_f5f50ba249f6f8::t_1483988e0e4209 482
+  s_f5f50ba249f6f8::t_493aa910b72c9f 493
+  s_f5f50ba249f6f8::t_b2ccc797a8ff63 450-454,499-503,523-527
+llmscatalog/src/Controller/Admin/ConfigurationController.php
+  s_f5f50ba249f6f8::t_1e0ecfb572cd18 72-73
+  s_f5f50ba249f6f8::t_36fc2a699a5b89 88,124
+llmscatalog/config.xml
+  s_f5f50ba249f6f8::t_1e0ecfb572cd18 5
+README.md
+  s_d0977efddcda0f::t_7a2931b0bfbca4 16,24
+  s_f5f50ba249f6f8::t_40eab750a12d53 32
+docs/specs/06-rich-product-markdown.md
+  s_d0977efddcda0f::t_60324231759cdd 865-871
+  s_d0977efddcda0f::t_5d11befbb9f341 3
+llmscatalog/src/Service/StructuredDataPageAugmentationService.php
+  s_f5f50ba249f6f8::t_33b63aec804fee 7,10,125-138,142-176
+  s_f5f50ba249f6f8::t_f76b96d1150d76 12
+  s_f5f50ba249f6f8::t_bd306755e73af4 177-178
+docs/specs/04-canonical-routes-and-duplicates.md
+  s_d0977efddcda0f::t_5def046d0001e5 5,10,518-519
+docs/specs/01-price-context-and-cache-safety.md
+  s_d0977efddcda0f::t_5d11befbb9f341 3
+  s_d0977efddcda0f::t_5def046d0001e5 7-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cedbd6eec7fd2901b101a5e6869d2b7cf5cc71d3",
+  "prompts": {},
+  "sessions": {
+    "s_d0977efddcda0f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a124de-239a-73f0-93ab-67fcd51848f1",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    },
+    "s_f5f50ba249f6f8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a12518-da5e-7d30-a885-91ee0a40f2bd",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Yannick Grenzinger <yannick.grenzinger@gmail.com>"
+    }
+  }
+}
